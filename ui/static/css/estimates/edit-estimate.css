@@ -1,0 +1,29 @@
+.layout {
+  display: flex;
+  margin-left: 200px;
+  height: 100vh;
+}
+
+.customer-info {
+  flex: 0 0 20%;
+  height: 40%;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}
+
+.main-panel {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}
+
+.summary {
+  flex: 0 0 25%;
+  height: 27%;
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 5px;
+}

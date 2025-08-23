@@ -1,0 +1,16 @@
+main {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+
+.form-container {
+  display: flex;
+  position: absolute;
+  min-height: 100px;
+  justify-content: center;
+  align-items: center;
+}

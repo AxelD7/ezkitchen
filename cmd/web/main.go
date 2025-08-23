@@ -1,7 +1,12 @@
+// main.go contains our initalization processes and url patterns.
+// This initializes our server loads in any of our .env files, establishes our connection to the database,
+// allows for our DB models to have access to our DB connection for queries, and contains our URL patterns/handlers.
+
 package main
 
 import (
 	"database/sql"
+	"ezkitchen/internal/models"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -13,7 +18,9 @@ import (
 )
 
 type application struct {
-	logger *slog.Logger
+	logger    *slog.Logger
+	estimates *models.EstimateModel
+	users     *models.UserModel
 }
 
 func main() {
@@ -44,17 +51,32 @@ func main() {
 		os.Exit(1)
 	}
 
+	logger.Info(psqlStr)
+
 	defer db.Close()
 
-	// HTTP Server Start
+	app.estimates = &models.EstimateModel{DB: db}
+	app.users = &models.UserModel{DB: db}
+
+	// HTTP Routes
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", app.home)
+	fileServer := http.FileServer(http.Dir("./ui/static"))
+	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
+
+	mux.HandleFunc("GET /{$}", app.home)
+	mux.HandleFunc("GET /estimate/view/{id}", app.estimateView)
+	mux.HandleFunc("GET /estimate/create", app.estimateCreate)
+	mux.HandleFunc("GET /estimate/edit/{id}", app.estimateEditView)
+
+	mux.HandleFunc("POST /estimate/create", app.estimateCreatePost)
+	mux.HandleFunc("POST /estimate/update", app.estimateUpdate)
+
+	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
 
 	logger.Info("Starting server", "addr", *addr)
 
 	err = http.ListenAndServe(*addr, mux)
-
 	logger.Error(err.Error())
 	os.Exit(1)
 

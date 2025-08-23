@@ -1,0 +1,68 @@
+{{define "header-tags"}}
+<link rel="stylesheet" href="/static/css/main.css">
+<link rel="stylesheet" href="/static/css/estimates/edit-estimate.css">
+
+{{end}}
+
+
+{{define "content"}}
+
+<div class="layout">
+    <div class="customer-info">
+        <h3>Customer: {{.Customer.Name}}</h3>
+        <h3>Estimate ID: {{.Estimate.EstimateID}}</h3>
+        <p>Address: {{.Estimate.Street}} {{.Estimate.City}} {{.Estimate.State}} {{.Estimate.Zip}}</p>
+        <p>Contact: {{.Customer.Phone}}</p>
+        <p>Details: </p>
+        <ul>
+            <li>Kitchen Dimentions| Length: {{.Estimate.KitchenLengthFt}}
+                Width: {{.Estimate.KitchenWidthFt}} Height: {{.Estimate.KitchenHeightFt}}</li>
+            <li>Doorways| Width: {{.Estimate.DoorWidthInches}} Height: {{.Estimate.DoorHeightInches}}</li>
+            <li>Flooring Type| {{.Estimate.FlooringType}}</li>
+            <!-- NOTE: Add something for has island possible an if statement opening a category for items -->
+        </ul>
+    </div>
+
+    <div class="main-panel">
+        <h1>Estimate Line Items</h1>
+
+        <div class="appliances-category">
+            <h2>Appliances</h2>
+
+            <h3>Fridge</h3>
+
+            <button>Add Items</button>
+
+
+            <h3>Stove</h3>
+            <form>
+                <input type="radio" id="gas" name="stove-type">
+                <label for="gas">Gas</label>
+
+                <input type="radio" id="electric" name="stove-type">
+                <label for="electric">Electric</label>
+            </form>
+            <button>Add Items</button>
+        </div>
+
+
+
+        <div class="cabinets-category">
+            <h2>Cabinets & Counter Tops</h2>
+            <h3>Cabinets</h3>
+            <button>Add Items</button>
+            <h3>Counter Tops</h3>
+            <button>Add Items</button>
+        </div>
+    </div>
+    <div class="summary">
+        <h1>Estimate Summary</h1>
+        <p>Sub-Total: </p>
+        <p>Labor Cost: </p>
+        <p>Sales Tax: </p>
+        <p>Estimate Total:</p>
+
+        <button style="color: #e74c3c;">Submit Estimate for Customer Invoice</button>
+    </div>
+</div>
+{{end}}
