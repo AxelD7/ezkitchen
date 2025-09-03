@@ -4,6 +4,8 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -45,4 +47,29 @@ func (app *application) formFloat32Parse(r *http.Request, field string) float32 
 
 	return float32(valF64)
 
+}
+
+// render is a function to render our templates(html) and any templateData when called in a handler function.
+// this function does a test render before actually writing to the response writer in the event of any errors they get
+// handled.
+func (app *application) render(w http.ResponseWriter, r *http.Request, status int, page string, data templateData) {
+
+	ts, ok := app.templateCache[page]
+	if !ok {
+		err := fmt.Errorf("the template %s does not exist", page)
+		app.serverError(w, r, err)
+		return
+	}
+
+	buf := new(bytes.Buffer)
+
+	err := ts.ExecuteTemplate(buf, "base", data)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(status)
+
+	buf.WriteTo(w)
 }

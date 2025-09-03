@@ -6,29 +6,12 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"text/template"
 	"time"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	files := []string{
-		"./ui/html/pages/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/home.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
+	app.render(w, r, http.StatusOK, "home.tmpl", templateData{})
 }
 
 func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
@@ -51,24 +34,7 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) estimateCreate(w http.ResponseWriter, r *http.Request) {
 
-	files := []string{
-		"./ui/html/pages/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/createEstimate.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", nil)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
+	app.render(w, r, http.StatusOK, "createEstimate.tmpl", templateData{})
 }
 
 func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Request) {
@@ -145,31 +111,10 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	data := struct {
-		Estimate models.Estimate
-		Customer models.User
-	}{
+	app.render(w, r, http.StatusOK, "editEstimate.tmpl", templateData{
 		Estimate: estimate,
 		Customer: customer,
-	}
-
-	files := []string{
-		"./ui/html/pages/base.tmpl",
-		"./ui/html/partials/nav.tmpl",
-		"./ui/html/pages/editEstimate.tmpl",
-	}
-
-	ts, err := template.ParseFiles(files...)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
-
-	err = ts.ExecuteTemplate(w, "base", data)
-	if err != nil {
-		app.serverError(w, r, err)
-		return
-	}
+	})
 
 	app.logger.Info(fmt.Sprintf("Viewing and editting the estimate with id %v", estimate.EstimateID))
 

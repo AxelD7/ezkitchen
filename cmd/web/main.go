@@ -12,15 +12,17 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"text/template"
 
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type application struct {
-	logger    *slog.Logger
-	estimates *models.EstimateModel
-	users     *models.UserModel
+	logger        *slog.Logger
+	estimates     *models.EstimateModel
+	users         *models.UserModel
+	templateCache map[string]*template.Template
 }
 
 func main() {
@@ -55,8 +57,15 @@ func main() {
 
 	defer db.Close()
 
+	templateCache, err := newTemplateCache()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app.estimates = &models.EstimateModel{DB: db}
 	app.users = &models.UserModel{DB: db}
+	app.templateCache = templateCache
 
 	// HTTP Routes
 	mux := http.NewServeMux()
