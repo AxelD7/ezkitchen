@@ -67,25 +67,9 @@ func main() {
 	app.users = &models.UserModel{DB: db}
 	app.templateCache = templateCache
 
-	// HTTP Routes
-	mux := http.NewServeMux()
-
-	fileServer := http.FileServer(http.Dir("./ui/static"))
-	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
-
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /estimate/view/{id}", app.estimateView)
-	mux.HandleFunc("GET /estimate/create", app.estimateCreate)
-	mux.HandleFunc("GET /estimate/edit/{id}", app.estimateEditView)
-
-	mux.HandleFunc("POST /estimate/create", app.estimateCreatePost)
-	mux.HandleFunc("POST /estimate/update", app.estimateUpdate)
-
-	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
-
 	logger.Info("Starting server", "addr", *addr)
 
-	err = http.ListenAndServe(*addr, mux)
+	err = http.ListenAndServe(*addr, app.routes())
 	logger.Error(err.Error())
 	os.Exit(1)
 
