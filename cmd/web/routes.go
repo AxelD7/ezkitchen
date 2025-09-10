@@ -13,15 +13,21 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
+	// --------------- Estimates ---------------
 	mux.HandleFunc("GET /{$}", app.home)
 	mux.HandleFunc("GET /estimate/view/{id}", app.estimateView)
 	mux.HandleFunc("GET /estimate/create", app.estimateCreate)
 	mux.HandleFunc("GET /estimate/edit/{id}", app.estimateEditView)
-
 	mux.HandleFunc("POST /estimate/create", app.estimateCreatePost)
 	mux.HandleFunc("POST /estimate/update", app.estimateUpdate)
 
 	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
+
+	// --------------- Products ---------------
+	mux.HandleFunc("GET /product/get", app.productGet)
+	mux.HandleFunc("POST /product/create", app.productCreate)
+	mux.HandleFunc("POST /product/update", app.productUpdate)
+	mux.HandleFunc("DELETE /product/delete", app.productDelete)
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 

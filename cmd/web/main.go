@@ -21,6 +21,7 @@ import (
 type application struct {
 	logger        *slog.Logger
 	estimates     *models.EstimateModel
+	products      *models.ProductModel
 	users         *models.UserModel
 	templateCache map[string]*template.Template
 }
@@ -64,6 +65,7 @@ func main() {
 	}
 
 	app.estimates = &models.EstimateModel{DB: db}
+	app.products = &models.ProductModel{DB: db}
 	app.users = &models.UserModel{DB: db}
 	app.templateCache = templateCache
 

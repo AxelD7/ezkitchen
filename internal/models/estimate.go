@@ -170,47 +170,44 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 // this function only returns errors.
 func (m *EstimateModel) Update(e *Estimate) error {
 	stmt := `UPDATE estimates
-             SET customer_id = $2,status = $3,kitchen_length_ft = $4,kitchen_width_ft = $5,kitchen_height_ft = $6,door_width_inches = $7,door_height_inches = $8,flooring_type = $9,has_island = $10,street = $11,city = $12,state = $13,zip = $14
-             WHERE estimate_id = $1;`
+         SET customer_id=$2, status=$3, kitchen_length_ft=$4,
+             kitchen_width_ft=$5, kitchen_height_ft=$6,
+             door_width_inches=$7, door_height_inches=$8,
+             flooring_type=$9, has_island=$10,
+             street=$11, city=$12, state=$13, zip=$14
+         WHERE estimate_id=$1
+         RETURNING estimate_id`
 
-	result, err := m.DB.Exec(stmt,
-		e.CustomerID, e.CreatedBy, e.Status, e.CreatedAt,
+	var id int
+	err := m.DB.QueryRow(stmt,
+		e.EstimateID, e.CustomerID, e.Status,
 		e.KitchenLengthFt, e.KitchenWidthFt, e.KitchenHeightFt,
 		e.DoorWidthInches, e.DoorHeightInches, e.FlooringType, e.HasIsland,
 		e.Street, e.City, e.State, e.Zip,
-	)
+	).Scan(&id)
+
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNoRecord
+		}
 		return err
 	}
-
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("no rows were affected for estimate ID %d", e.EstimateID)
-	}
-
 	return nil
+
 }
 
 // Delete removes an Estimate from the table based off of the ID.
 // This only returns Errors.
 func (m *EstimateModel) Delete(id int) error {
 
-	stmt := `DELETE FROM estimates WHERE estimate_id=$1`
+	stmt := `DELETE FROM estimates WHERE estimate_id=$1 RETURNING estimate_id`
 
-	result, err := m.DB.Exec(stmt, id)
+	err := m.DB.QueryRow(stmt, id).Scan(&id)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return ErrNoRecord
+		}
 		return err
 	}
-	rowsAffected, err := result.RowsAffected()
-	if err != nil {
-		return err
-	}
-	if rowsAffected == 0 {
-		return fmt.Errorf("no rows were affected")
-	}
-
 	return nil
 }
