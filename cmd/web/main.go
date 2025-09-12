@@ -38,15 +38,15 @@ func main() {
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 	flag.Parse()
 
-	err := godotenv.Load("secrets.env")
+	err := godotenv.Load(".env")
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
 	//Database connection
-	psqlStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("HOST"), os.Getenv("PORT"),
-		os.Getenv("DBUSER"), os.Getenv("PASSWORD"), os.Getenv("DBNAME"))
+	psqlStr := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", os.Getenv("DB_HOST"), os.Getenv("DB_PORT"),
+		os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME"))
 
 	db, err := openDB(psqlStr)
 	if err != nil {

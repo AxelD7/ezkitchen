@@ -57,22 +57,22 @@ func (s EstimateStatus) String() string {
 // Estimate Struct is all the values held within the Estimate Database Object. Only values that cannot be null within
 // the DB are EstimateID and CreatedBy
 type Estimate struct {
-	EstimateID       int // primary key
-	CustomerID       int
-	CreatedBy        int // surveyor who creates the estimate.
-	Status           EstimateStatus
-	CreatedAt        time.Time
-	KitchenLengthFt  float32
-	KitchenWidthFt   float32
-	KitchenHeightFt  float32
-	DoorWidthInches  float32
-	DoorHeightInches float32
-	FlooringType     string
-	HasIsland        bool
-	Street           string
-	City             string
-	State            string
-	Zip              string
+	EstimateID        int // primary key
+	CustomerID        int
+	CreatedBy         int // surveyor who creates the estimate.
+	Status            EstimateStatus
+	CreatedAt         time.Time
+	KitchenLengthInch float32
+	KitchenWidthInch  float32
+	KitchenHeightInch float32
+	DoorWidthInch     float32
+	DoorHeightInch    float32
+	FlooringType      string
+	HasIsland         bool
+	Street            string
+	City              string
+	State             string
+	Zip               string
 }
 
 // EstimateModel wraps our sql.DB connection and allows for methods like Insert, Get, and Delete to work for estimates.
@@ -84,8 +84,8 @@ type EstimateModel struct {
 func (m *EstimateModel) Insert(e *Estimate) error {
 	stmt := `INSERT INTO estimates (
                 customer_id, created_by, status, created_at,
-                kitchen_length_ft, kitchen_width_ft, kitchen_height_ft,
-                door_width_inches, door_height_inches, flooring_type, has_island,
+                kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
+                door_width_inch, door_height_inch, flooring_type, has_island,
                 street, city, state, zip
              )
              VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
@@ -93,8 +93,8 @@ func (m *EstimateModel) Insert(e *Estimate) error {
 
 	err := m.DB.QueryRow(stmt,
 		e.CustomerID, e.CreatedBy, e.Status, e.CreatedAt,
-		e.KitchenLengthFt, e.KitchenWidthFt, e.KitchenHeightFt,
-		e.DoorWidthInches, e.DoorHeightInches, e.FlooringType, e.HasIsland,
+		e.KitchenLengthInch, e.KitchenWidthInch, e.KitchenHeightInch,
+		e.DoorWidthInch, e.DoorHeightInch, e.FlooringType, e.HasIsland,
 		e.Street, e.City, e.State, e.Zip,
 	).Scan(&e.EstimateID)
 
@@ -110,14 +110,14 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 	var estimate Estimate
 
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
-       kitchen_length_ft, kitchen_width_ft, kitchen_height_ft,
-       door_width_inches, door_height_inches, flooring_type, has_island,
-       street, city, state, zip 
-	   FROM estimates WHERE estimate_id=$1;`
+       	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
+    	door_width_inch, door_height_inch, flooring_type, has_island,
+    	street, city, state, zip 
+	   	FROM estimates WHERE estimate_id=$1;`
 
 	var statusInt int
 	row := m.DB.QueryRow(stmt, id)
-	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthFt, &estimate.KitchenWidthFt, &estimate.KitchenHeightFt, &estimate.DoorWidthInches, &estimate.DoorHeightInches, &estimate.FlooringType, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.FlooringType, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -137,10 +137,10 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error) {
 	var estimates []Estimate
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
-       kitchen_length_ft, kitchen_width_ft, kitchen_height_ft,
-       door_width_inches, door_height_inches, flooring_type, has_island,
-       street, city, state, zip 
-	   FROM estimates WHERE created_by=$1 ORDER BY created_at LIMIT $2`
+       	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
+		door_width_inch, door_height_inch, flooring_type, has_island,
+       	street, city, state, zip 
+	   	FROM estimates WHERE created_by=$1 ORDER BY created_at LIMIT $2`
 
 	rows, err := m.DB.Query(stmt, surveyorID, 10)
 	if err == sql.ErrNoRows {
@@ -155,7 +155,7 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 		var estimate Estimate
 
 		err = rows.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &estimate.CreatedAt,
-			&estimate.Status, &estimate.KitchenLengthFt, &estimate.KitchenWidthFt, &estimate.KitchenHeightFt, &estimate.DoorWidthInches, &estimate.DoorHeightInches, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+			&estimate.Status, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
 		if err != nil {
 			return nil, err
 		}
@@ -170,9 +170,9 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 // this function only returns errors.
 func (m *EstimateModel) Update(e *Estimate) error {
 	stmt := `UPDATE estimates
-         SET customer_id=$2, status=$3, kitchen_length_ft=$4,
-             kitchen_width_ft=$5, kitchen_height_ft=$6,
-             door_width_inches=$7, door_height_inches=$8,
+         SET customer_id=$2, status=$3, kitchen_length_inch=$4,
+             kitchen_width_inch=$5, kitchen_height_inch=$6,
+             door_width_inch=$7, door_height_inch=$8,
              flooring_type=$9, has_island=$10,
              street=$11, city=$12, state=$13, zip=$14
          WHERE estimate_id=$1
@@ -181,8 +181,8 @@ func (m *EstimateModel) Update(e *Estimate) error {
 	var id int
 	err := m.DB.QueryRow(stmt,
 		e.EstimateID, e.CustomerID, e.Status,
-		e.KitchenLengthFt, e.KitchenWidthFt, e.KitchenHeightFt,
-		e.DoorWidthInches, e.DoorHeightInches, e.FlooringType, e.HasIsland,
+		e.KitchenLengthInch, e.KitchenWidthInch, e.KitchenHeightInch,
+		e.DoorWidthInch, e.DoorHeightInch, e.FlooringType, e.HasIsland,
 		e.Street, e.City, e.State, e.Zip,
 	).Scan(&id)
 

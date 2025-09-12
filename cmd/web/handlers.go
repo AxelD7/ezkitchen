@@ -44,7 +44,7 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 	}
 
 	customer := models.User{
-		Name:         r.PostForm.Get("name"),
+		Name:         r.PostForm.Get("customerName"),
 		Email:        r.PostForm.Get("email"),
 		PasswordHash: "",
 		Phone:        r.PostForm.Get("phone"),
@@ -59,21 +59,21 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 	}
 
 	estimate := models.Estimate{
-		CustomerID:       customer.UserID,
-		CreatedBy:        2,
-		Status:           models.StatusDraft,
-		CreatedAt:        time.Now(),
-		KitchenLengthFt:  app.formFloat32Parse(r, "kitchenLength"),
-		KitchenWidthFt:   app.formFloat32Parse(r, "kitchenWidth"),
-		KitchenHeightFt:  app.formFloat32Parse(r, "kitchenHeight"),
-		DoorWidthInches:  app.formFloat32Parse(r, "doorwayWidth"),
-		DoorHeightInches: app.formFloat32Parse(r, "doorwayHeight"),
-		HasIsland:        false,
-		FlooringType:     r.PostForm.Get("flooringType"),
-		Street:           r.PostForm.Get("street"),
-		City:             r.PostForm.Get("city"),
-		State:            r.PostForm.Get("state"),
-		Zip:              r.PostForm.Get("zip"),
+		CustomerID:        customer.UserID,
+		CreatedBy:         1,
+		Status:            models.StatusDraft,
+		CreatedAt:         time.Now(),
+		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
+		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),
+		KitchenHeightInch: app.formFloat32Parse(r, "kitchenHeight"),
+		DoorWidthInch:     app.formFloat32Parse(r, "doorwayWidth"),
+		DoorHeightInch:    app.formFloat32Parse(r, "doorwayHeight"),
+		HasIsland:         false,
+		FlooringType:      r.PostForm.Get("flooringType"),
+		Street:            r.PostForm.Get("street"),
+		City:              r.PostForm.Get("city"),
+		State:             r.PostForm.Get("state"),
+		Zip:               r.PostForm.Get("zip"),
 	}
 
 	err = app.estimates.Insert(&estimate)
@@ -123,21 +123,21 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 func (app *application) estimateUpdate(w http.ResponseWriter, r *http.Request) {
 
 	estimate := models.Estimate{
-		CustomerID:       2,
-		CreatedBy:        2,
-		Status:           models.StatusDraft,
-		CreatedAt:        time.Now(),
-		KitchenLengthFt:  app.formFloat32Parse(r, "kitchenLength"),
-		KitchenWidthFt:   app.formFloat32Parse(r, "kitchenWidth"),
-		KitchenHeightFt:  app.formFloat32Parse(r, "kitchenHeight"),
-		DoorWidthInches:  app.formFloat32Parse(r, "doorwayWidth"),
-		DoorHeightInches: app.formFloat32Parse(r, "doorwayHeight"),
-		HasIsland:        false,
-		FlooringType:     r.PostForm.Get("flooringType"),
-		Street:           r.PostForm.Get("street"),
-		City:             r.PostForm.Get("city"),
-		State:            r.PostForm.Get("state"),
-		Zip:              r.PostForm.Get("zip"),
+		CustomerID:        2,
+		CreatedBy:         2,
+		Status:            models.StatusDraft,
+		CreatedAt:         time.Now(),
+		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
+		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),
+		KitchenHeightInch: app.formFloat32Parse(r, "kitchenHeight"),
+		DoorWidthInch:     app.formFloat32Parse(r, "doorwayWidth"),
+		DoorHeightInch:    app.formFloat32Parse(r, "doorwayHeight"),
+		HasIsland:         false,
+		FlooringType:      r.PostForm.Get("flooringType"),
+		Street:            r.PostForm.Get("street"),
+		City:              r.PostForm.Get("city"),
+		State:             r.PostForm.Get("state"),
+		Zip:               r.PostForm.Get("zip"),
 	}
 
 	err := app.estimates.Update(&estimate)
