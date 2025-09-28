@@ -2,3 +2,4 @@ secrets.env
 .env
 tmp/build-errors.log
 tmp/main
+ezkitchen-docs/

@@ -1,16 +1,84 @@
 main {
+  height: 100vh;
+  margin-left: 15rem;
+  width: calc(100% - 15rem);
   display: flex;
-  flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+}
+
+h1 {
+  text-align: center;
+}
+
+.estimate-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.main-section {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  border: 2px solid black;
+  border-radius: 12px;
+  background: white;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.customer-info,
+.kitchen-details {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 10px 15px;
+  align-items: center;
+}
+
+.customer-info {
+  border-right: 2px solid black;
+  padding-right: 20px;
+}
+
+.kitchen-details {
+  padding-left: 20px;
+}
+
+.form-control {
+  align-self: end;
+}
+
+.submitButton {
+  display: inline-block;
+  outline: 0;
+  cursor: pointer;
+  text-align: center;
+  border: 0;
+  padding: 7px 16px;
+  min-height: 36px;
+  min-width: 36px;
+  color: #333C4D;
+  background: #66CC8A;
+  border-radius: 4px;
+  font-weight: 500;
+  font-size: 14px;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px, rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+}
+
+.submitButton:hover {
+  background: #00A96E;
 }
 
 
-.form-container {
-  display: flex;
-  position: absolute;
-  min-height: 100px;
-  justify-content: center;
-  align-items: center;
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
