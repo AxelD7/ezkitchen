@@ -9,6 +9,7 @@ type Product struct {
 	ProductID   int
 	Name        string
 	Description string
+	Category    string
 	UnitPrice   float64
 	CreatedBy   int
 }
@@ -18,11 +19,11 @@ type ProductModel struct {
 }
 
 func (m *ProductModel) Insert(p *Product) error {
-	stmt := `INSERT INTO products (name, description, unit_price, created_by)
-		VALUES ($1, $2, $3, $4)
+	stmt := `INSERT INTO products (name, description, category, unit_price, created_by)
+		VALUES ($1, $2, $3, $4, $5)
 		RETURNING product_id`
 
-	err := m.DB.QueryRow(stmt, p.Name, p.Description, p.UnitPrice, p.CreatedBy).Scan(&p.ProductID)
+	err := m.DB.QueryRow(stmt, p.Name, p.Description, p.Category, p.UnitPrice, p.CreatedBy).Scan(&p.ProductID)
 	if err != nil {
 		return err
 	}
@@ -31,11 +32,11 @@ func (m *ProductModel) Insert(p *Product) error {
 }
 
 func (m *ProductModel) Get(id int) (Product, error) {
-	stmt := `SELECT product_id, name, description, unit_price, created_by
+	stmt := `SELECT product_id, name, description, category, unit_price, created_by
 		FROM products WHERE product_id=$1`
 
 	var p Product
-	err := m.DB.QueryRow(stmt, id).Scan(&p.ProductID, &p.Name, &p.Description, &p.UnitPrice, &p.CreatedBy)
+	err := m.DB.QueryRow(stmt, id).Scan(&p.ProductID, &p.Name, &p.Description, &p.Category, &p.UnitPrice, &p.CreatedBy)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Product{}, ErrNoRecord
@@ -46,32 +47,64 @@ func (m *ProductModel) Get(id int) (Product, error) {
 	return p, nil
 }
 
+func (m *ProductModel) GetByProductCategory(category string) ([]Product, error) {
+	stmt := `SELECT product_id, name, description, category, unit_price, created_by FROM products WHERE category=$1`
+	var products []Product
+
+	rows, err := m.DB.Query(stmt, category)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var product Product
+		err := rows.Scan(&product.ProductID, &product.Name, &product.Description, &product.Category, &product.UnitPrice, &product.CreatedBy)
+		if err != nil {
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	return products, nil
+}
+
 func (m *ProductModel) Update(p *Product) error {
 	stmt := `UPDATE products
-		SET name=$2, description=$3, unit_price=$4, created_by=$5
-		WHERE product_id=$1 RETURNING product_id`
+		SET name=$2, description=$3, category=$4, unit_price=$5, created_by=$6
+		WHERE product_id=$1`
 
-	err := m.DB.QueryRow(stmt, p.ProductID, p.Name, p.Description, p.UnitPrice, p.CreatedBy).Scan(&p.ProductID)
+	result, err := m.DB.Exec(stmt, p.ProductID, p.Name, p.Description, p.Category, p.UnitPrice, p.CreatedBy)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoRecord
-		}
 		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNoRecord
 	}
 
 	return nil
 }
 
 func (m *ProductModel) Delete(id int) error {
-	stmt := `DELETE FROM products WHERE product_id=$1 RETURNING product_id`
+	stmt := `DELETE FROM products WHERE product_id=$1`
 
-	err := m.DB.QueryRow(stmt, id).Scan(&id)
+	result, err := m.DB.Exec(stmt, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoRecord
-		}
-
 		return err
+	}
+
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNoRecord
 	}
 
 	return nil
