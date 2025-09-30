@@ -10,7 +10,6 @@ CREATE TABLE IF NOT EXISTS estimates (
     door_width_inch DOUBLE PRECISION,
     door_height_inch DOUBLE PRECISION,
     flooring_type VARCHAR(255),
-    has_island BOOLEAN,
     street VARCHAR(255),
     city VARCHAR(50),
     state VARCHAR(60),

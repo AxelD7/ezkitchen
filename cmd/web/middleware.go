@@ -8,7 +8,6 @@ import (
 // -------------- Middle Wares --------------
 func commonHeaders(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// Note: This is split across multiple lines for readability. You don't
 		w.Header().Set("Content-Security-Policy",
 			"default-src 'self';")
 		w.Header().Set("Referrer-Policy", "origin-when-cross-origin")

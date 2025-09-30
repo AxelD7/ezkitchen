@@ -24,7 +24,7 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
 
 	// --------------- Products ---------------
-	mux.HandleFunc("GET /product/get", app.productGet)
+	mux.HandleFunc("GET /product/get/{id}", app.productGet)
 	mux.HandleFunc("POST /product/create", app.productCreate)
 	mux.HandleFunc("POST /product/update", app.productUpdate)
 	mux.HandleFunc("DELETE /product/delete", app.productDelete)

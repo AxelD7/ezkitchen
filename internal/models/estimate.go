@@ -31,7 +31,7 @@ const (
 	StatusAwaitingContractor
 	// StatusInProgress - the status of physical work being done as in literal work IN PROGRESS.
 	StatusInProgress
-	// StatusDone - all things complete job is done.
+	// StatusCompleted - all things complete job is done.
 	StatusCompleted
 )
 
@@ -67,8 +67,6 @@ type Estimate struct {
 	KitchenHeightInch float32
 	DoorWidthInch     float32
 	DoorHeightInch    float32
-	FlooringType      string
-	HasIsland         bool
 	Street            string
 	City              string
 	State             string
@@ -82,20 +80,18 @@ type EstimateModel struct {
 
 // Insert creates a new estimate in the database and sets e.EstimateID.
 func (m *EstimateModel) Insert(e *Estimate) error {
-	stmt := `INSERT INTO estimates (
-                customer_id, created_by, status, created_at,
-                kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
-                door_width_inch, door_height_inch, flooring_type, has_island,
-                street, city, state, zip
-             )
-             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
-             RETURNING estimate_id`
+	stmt := `INSERT INTO estimates 
+	(customer_id, created_by, status, created_at,
+    kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
+    door_width_inch, door_height_inch,
+    street, city, state, zip)
+	VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+	RETURNING estimate_id`
 
 	err := m.DB.QueryRow(stmt,
 		e.CustomerID, e.CreatedBy, e.Status, e.CreatedAt,
 		e.KitchenLengthInch, e.KitchenWidthInch, e.KitchenHeightInch,
-		e.DoorWidthInch, e.DoorHeightInch, e.FlooringType, e.HasIsland,
-		e.Street, e.City, e.State, e.Zip,
+		e.DoorWidthInch, e.DoorHeightInch, e.Street, e.City, e.State, e.Zip,
 	).Scan(&e.EstimateID)
 
 	if err != nil {
@@ -111,13 +107,12 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
        	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
-    	door_width_inch, door_height_inch, flooring_type, has_island,
-    	street, city, state, zip 
+    	door_width_inch, door_height_inch, street, city, state, zip 
 	   	FROM estimates WHERE estimate_id=$1;`
 
 	var statusInt int
 	row := m.DB.QueryRow(stmt, id)
-	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.FlooringType, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -138,8 +133,7 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 	var estimates []Estimate
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
        	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
-		door_width_inch, door_height_inch, flooring_type, has_island,
-       	street, city, state, zip 
+		door_width_inch, door_height_inch, street, city, state, zip 
 	   	FROM estimates WHERE created_by=$1 ORDER BY created_at LIMIT $2`
 
 	rows, err := m.DB.Query(stmt, surveyorID, 10)
@@ -154,8 +148,11 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 	for rows.Next() {
 		var estimate Estimate
 
-		err = rows.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &estimate.CreatedAt,
-			&estimate.Status, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.HasIsland, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+		var statusInt int
+		err = rows.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+
+		estimate.Status = EstimateStatus(statusInt)
+
 		if err != nil {
 			return nil, err
 		}
@@ -170,28 +167,29 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 // this function only returns errors.
 func (m *EstimateModel) Update(e *Estimate) error {
 	stmt := `UPDATE estimates
-         SET customer_id=$2, status=$3, kitchen_length_inch=$4,
-             kitchen_width_inch=$5, kitchen_height_inch=$6,
-             door_width_inch=$7, door_height_inch=$8,
-             flooring_type=$9, has_island=$10,
-             street=$11, city=$12, state=$13, zip=$14
-         WHERE estimate_id=$1
-         RETURNING estimate_id`
+ 	SET customer_id=$2, status=$3,
+    kitchen_length_inch=$4, kitchen_width_inch=$5, kitchen_height_inch=$6,
+    door_width_inch=$7, door_height_inch=$8,
+    street=$9, city=$10, state=$11, zip=$12
+	WHERE estimate_id=$1`
 
-	var id int
-	err := m.DB.QueryRow(stmt,
+	result, err := m.DB.Exec(stmt,
 		e.EstimateID, e.CustomerID, e.Status,
 		e.KitchenLengthInch, e.KitchenWidthInch, e.KitchenHeightInch,
-		e.DoorWidthInch, e.DoorHeightInch, e.FlooringType, e.HasIsland,
-		e.Street, e.City, e.State, e.Zip,
-	).Scan(&id)
+		e.DoorWidthInch, e.DoorHeightInch, e.Street, e.City, e.State, e.Zip,
+	)
 
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoRecord
-		}
 		return err
 	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNoRecord
+	}
+
 	return nil
 
 }
@@ -200,14 +198,19 @@ func (m *EstimateModel) Update(e *Estimate) error {
 // This only returns Errors.
 func (m *EstimateModel) Delete(id int) error {
 
-	stmt := `DELETE FROM estimates WHERE estimate_id=$1 RETURNING estimate_id`
+	stmt := `DELETE FROM estimates WHERE estimate_id=$1`
 
-	err := m.DB.QueryRow(stmt, id).Scan(&id)
+	result, err := m.DB.Exec(stmt, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return ErrNoRecord
-		}
 		return err
 	}
+	rows, err := result.RowsAffected()
+	if err != nil {
+		return err
+	}
+	if rows == 0 {
+		return ErrNoRecord
+	}
+
 	return nil
 }
