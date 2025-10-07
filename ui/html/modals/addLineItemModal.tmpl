@@ -1,0 +1,23 @@
+{{define "addLineItemModal"}}
+<div class="product-modal-content">
+    <div class="modal-header">
+        <span class="close">&times;</span>
+        <h2 id="modal-header">Add a Product</h2>
+        <div class="search-box">
+            <input type="text" placeholder="Search...">
+        </div>
+    </div>
+    <div class="modal-body">
+
+        {{ range .Products }}
+        <div class="card">
+            <h3>{{.Name}}</h3>
+            <p>{{.Description}}</p>
+            <p>{{.Color}}</p>
+            <p>${{printf "%.2f" .UnitPrice}}</p>
+            <button class="add-item-btn" id="{{.ProductID}}">+</button>
+        </div>
+        {{ end }}
+    </div>
+</div>
+{{ end }}

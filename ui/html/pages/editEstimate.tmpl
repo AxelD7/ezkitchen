@@ -11,6 +11,8 @@
 {{define "content"}}
 
 <div class="main-section">
+
+    <dialog class="product-modal" id="product-modal"></dialog>
     <div class="customer-section">
         <h3>Customer: {{.Customer.Name}}</h3>
         <p>Address: {{.Estimate.Street}} {{.Estimate.City}} {{.Estimate.State}} {{.Estimate.Zip}}</p>
@@ -43,39 +45,66 @@
 
     <div class="items-section">
         <h1>Estimate Line Items</h1>
-
         <button class="accordion">Appliances</button>
         <div class="panel">
-            <button class="add-product-btn">Add an Appliance</button>
+            <button class="subcategory-accordion">Stoves</button>
+            <div class="subcategory-panel" id="Stove">
+                <button class="add-product-btn" id="Appliances">Add a Stove</button>
+            </div>
+            <button class="subcategory-accordion">Refridgerator</button>
+            <div class="subcategory-panel" id="Refrigerator">
+                <button class="add-product-btn" id="Appliances">Add a Fridge</button>
+            </div>
         </div>
         <button class="accordion">Cabinetry</button>
         <div class="panel">
-            <button class="add-product-btn">Add a Cabinet</button>
+            <button class="subcategory-accordion">Base Cabinet</button>
+            <div class="subcategory-panel" id="Base Cabinet">
+                <button class="add-product-btn" id="Cabinetry">Add a Cabinet</button>
+            </div>
         </div>
 
         <button class="accordion">Countertops</button>
         <div class="panel">
-            <button class="add-product-btn">Add a Countertop</button>
+            <div class="subcategory-panel" id="Countertop">
+                <button class="add-product-btn">Add a Countertop</button>
+
+            </div>
         </div>
 
         <button class="accordion">Sinks & Faucets</button>
         <div class="panel">
-            <button class="add-product-btn">Add a sink or faucet</button>
+            <button class="subcategory-accordion">Sinks</button>
+            <div class="subcategory-panel" id="Sink">
+                <button class="add-product-btn">Add a sink</button>
+            </div>
+            <button class="subcategory-accordion">Faucets</button>
+            <div class="subcategory-panel" id="Faucet">
+                <button class="add-product-btn">Add a Faucet</button>
+            </div>
         </div>
 
         <button class="accordion">Flooring</button>
         <div class="panel">
-            <button class="add-product-btn">Choose your flooring</button>
+            <div class="subcategory-panel">
+                <button class="add-product-btn" id="Flooring">Choose your flooring</button>
+            </div>
         </div>
 
         <button class="accordion">Backsplash</button>
         <div class="panel">
-            <button class="add-product-btn">Add a Backsplash</button>
+            <div class="subcategory-panel">
+                <button class="add-product-btn" id="Backsplash">Add a Backsplash</button>
+
+            </div>
         </div>
 
         <button class="accordion">Misc</button>
         <div class="panel">
-            <button class="add-product-btn">Add any Miscellanious Items</button>
+            <div class="subcategory-panel">
+                <button class="add-product-btn" id="Misc">Add any Miscellanious Items</button>
+
+            </div>
         </div>
     </div>
     <div class="summary-section">
@@ -87,4 +116,6 @@
         <p>Estimate Total:</p>
     </div>
 </div>
+
+
 {{end}}
