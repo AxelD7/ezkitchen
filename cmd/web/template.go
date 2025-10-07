@@ -13,9 +13,11 @@ import (
 type templateData struct {
 	Estimate models.Estimate
 	Customer models.User
+	Product  models.Product
+	Products []models.Product
 }
 
-// newTemplateCache is a function that runs on server start. This function parses any pages/partial
+// newTemplateCache is a function that runs on server start. This function parses any pages/partial/modals
 // templates used in our server to prevent repetitive code and frequent file parsing on each page load.
 func newTemplateCache() (map[string]*template.Template, error) {
 
@@ -45,6 +47,21 @@ func newTemplateCache() (map[string]*template.Template, error) {
 
 		cache[name] = ts
 
+	}
+
+	modals, err := filepath.Glob("./ui/html/modals/*.tmpl")
+	if err != nil {
+		return nil, err
+	}
+	for _, modal := range modals {
+		name := filepath.Base(modal)
+
+		ts, err := template.ParseFiles(modal)
+		if err != nil {
+			return nil, err
+		}
+
+		cache[name] = ts
 	}
 
 	return cache, nil
