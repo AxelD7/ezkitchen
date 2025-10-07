@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"errors"
 	"ezkitchen/internal/models"
 	"fmt"
@@ -213,6 +214,34 @@ func (app *application) productGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("GOT PRODUCT ! : %+v", p)
+}
+
+func (app *application) fetchProductsByFilters(w http.ResponseWriter, r *http.Request) {
+	queryParams := r.URL.Query()
+	category := queryParams.Get("category")
+	subcategory := queryParams.Get("subcategory")
+	color := queryParams.Get("color")
+
+	products, err := app.products.GetByProductFilter(category, subcategory, color)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+	var buf bytes.Buffer
+
+	ts, ok := app.templateCache["addLineItemModal.tmpl"]
+	if !ok {
+		app.logger.Error("the template addLineItemModal.tmpl does not exist")
+		http.Error(w, `{"status": "error", "message": "template not found"}`, http.StatusInternalServerError)
+	}
+
+	ts.ExecuteTemplate(&buf, "addLineItemModal", templateData{
+		Products: products,
+	})
+
+	w.Header().Add("Content-Type", "text/html; charset=utf-8")
+	w.WriteHeader(http.StatusOK)
+	w.Write(buf.Bytes())
+
 }
 
 func (app *application) productDelete(w http.ResponseWriter, r *http.Request) {
