@@ -10,6 +10,8 @@ type Product struct {
 	Name        string
 	Description string
 	Category    string
+	Subcategory string
+	Color       string
 	UnitPrice   float64
 	CreatedBy   int
 }
@@ -19,11 +21,14 @@ type ProductModel struct {
 }
 
 func (m *ProductModel) Insert(p *Product) error {
-	stmt := `INSERT INTO products (name, description, category, unit_price, created_by)
-		VALUES ($1, $2, $3, $4, $5)
+	stmt := `INSERT INTO products (name, description, category, subcategory, color, unit_price, created_by)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING product_id`
 
-	err := m.DB.QueryRow(stmt, p.Name, p.Description, p.Category, p.UnitPrice, p.CreatedBy).Scan(&p.ProductID)
+	err := m.DB.QueryRow(stmt,
+		p.Name, p.Description, p.Category, p.Subcategory, p.Color, p.UnitPrice, p.CreatedBy,
+	).Scan(&p.ProductID)
+
 	if err != nil {
 		return err
 	}
@@ -32,11 +37,20 @@ func (m *ProductModel) Insert(p *Product) error {
 }
 
 func (m *ProductModel) Get(id int) (Product, error) {
-	stmt := `SELECT product_id, name, description, category, unit_price, created_by
+	stmt := `SELECT product_id, name, description, category, subcategory, color, unit_price, created_by
 		FROM products WHERE product_id=$1`
 
 	var p Product
-	err := m.DB.QueryRow(stmt, id).Scan(&p.ProductID, &p.Name, &p.Description, &p.Category, &p.UnitPrice, &p.CreatedBy)
+	err := m.DB.QueryRow(stmt, id).Scan(
+		&p.ProductID,
+		&p.Name,
+		&p.Description,
+		&p.Category,
+		&p.Subcategory,
+		&p.Color,
+		&p.UnitPrice,
+		&p.CreatedBy,
+	)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Product{}, ErrNoRecord
@@ -47,11 +61,16 @@ func (m *ProductModel) Get(id int) (Product, error) {
 	return p, nil
 }
 
-func (m *ProductModel) GetByProductCategory(category string) ([]Product, error) {
-	stmt := `SELECT product_id, name, description, category, unit_price, created_by FROM products WHERE category=$1`
+func (m *ProductModel) GetByProductFilter(category string, subcategory string, color string) ([]Product, error) {
+	stmt := `SELECT product_id, name, description, category, subcategory, color, unit_price, created_by 
+		FROM products 
+		WHERE ($1='' OR category=$1)
+		AND ($2='' OR subcategory=$2)
+		AND ($3='' OR color=$3)`
+
 	var products []Product
 
-	rows, err := m.DB.Query(stmt, category)
+	rows, err := m.DB.Query(stmt, category, subcategory, color)
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +78,19 @@ func (m *ProductModel) GetByProductCategory(category string) ([]Product, error) 
 
 	for rows.Next() {
 		var product Product
-		err := rows.Scan(&product.ProductID, &product.Name, &product.Description, &product.Category, &product.UnitPrice, &product.CreatedBy)
+		err := rows.Scan(
+			&product.ProductID,
+			&product.Name,
+			&product.Description,
+			&product.Category,
+			&product.Subcategory,
+			&product.Color,
+			&product.UnitPrice,
+			&product.CreatedBy,
+		)
 		if err != nil {
 			return nil, err
 		}
-
 		products = append(products, product)
 	}
 
@@ -72,10 +99,19 @@ func (m *ProductModel) GetByProductCategory(category string) ([]Product, error) 
 
 func (m *ProductModel) Update(p *Product) error {
 	stmt := `UPDATE products
-		SET name=$2, description=$3, category=$4, unit_price=$5, created_by=$6
+		SET name=$2, description=$3, category=$4, subcategory=$5, color=$6, unit_price=$7, created_by=$8
 		WHERE product_id=$1`
 
-	result, err := m.DB.Exec(stmt, p.ProductID, p.Name, p.Description, p.Category, p.UnitPrice, p.CreatedBy)
+	result, err := m.DB.Exec(stmt,
+		p.ProductID,
+		p.Name,
+		p.Description,
+		p.Category,
+		p.Subcategory,
+		p.Color,
+		p.UnitPrice,
+		p.CreatedBy,
+	)
 	if err != nil {
 		return err
 	}
