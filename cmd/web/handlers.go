@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"errors"
 	"ezkitchen/internal/models"
 	"fmt"
@@ -9,6 +10,11 @@ import (
 	"strconv"
 	"time"
 )
+
+type addProductRequest struct {
+	ProductID int `json:"product_id"`
+	Quantity  int `json:"quantity"`
+}
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
@@ -101,7 +107,11 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 		} else {
 			app.serverError(w, r, err)
 		}
-
+	}
+	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
 	}
 
 	customer, err := app.users.Get(estimate.CustomerID)
@@ -113,6 +123,7 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 	app.render(w, r, http.StatusOK, "editEstimate.tmpl", templateData{
 		Estimate: estimate,
 		Customer: customer,
+		Products: estimateProducts,
 	})
 
 	app.logger.Info(fmt.Sprintf("Viewing and editting the estimate with id %v", estimate.EstimateID))
@@ -234,13 +245,36 @@ func (app *application) fetchProductsByFilters(w http.ResponseWriter, r *http.Re
 		http.Error(w, `{"status": "error", "message": "template not found"}`, http.StatusInternalServerError)
 	}
 
-	ts.ExecuteTemplate(&buf, "addLineItemModal", templateData{
-		Products: products,
-	})
+	ts.ExecuteTemplate(&buf, "addLineItemModal", products)
 
 	w.Header().Add("Content-Type", "text/html; charset=utf-8")
 	w.WriteHeader(http.StatusOK)
 	w.Write(buf.Bytes())
+
+}
+
+func (app *application) addProductsToEstimate(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	var req addProductRequest
+	json.NewDecoder(r.Body).Decode(&req)
+
+	item := &models.EstimateItem{
+		EstimateID: id,
+		ProductID:  req.ProductID,
+		Quantity:   req.Quantity,
+	}
+
+	err = app.estimateItems.Insert(item)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 
 }
 

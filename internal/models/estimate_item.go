@@ -12,6 +12,11 @@ type EstimateItem struct {
 	Quantity   int
 }
 
+type ProductTemplateData struct {
+	Product      Product
+	EstimateItem EstimateItem
+}
+
 type EstimateItemModel struct {
 	DB *sql.DB
 }
@@ -42,31 +47,32 @@ func (m *EstimateItemModel) GetByLineItemID(id int) (EstimateItem, error) {
 	return estimateItem, nil
 }
 
-func (m *EstimateItemModel) GetByEstimateID(id int) ([]EstimateItem, error) {
-	var estimateItems []EstimateItem
-	stmt := `SELECT line_item_id, estimate_id, product_id, quantity FROM estimate_items WHERE estimate_id=$1`
+func (m *EstimateItemModel) GetByEstimateID(id int) ([]ProductTemplateData, error) {
+	var estimateProducts []ProductTemplateData
+	stmt := `SELECT ei.line_item_id, ei.product_id, ei.quantity, p.name, p.description, p.category, p.subcategory, p.color,  p.unit_price FROM estimate_items ei INNER JOIN products p on ei.product_id = p.product_id WHERE estimate_id=$1`
 	rows, err := m.DB.Query(stmt, id)
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, ErrNoRecord
-		}
 		return nil, err
 	}
 
 	defer rows.Close()
 	for rows.Next() {
-		var estimateItem EstimateItem
+		var estimateProduct ProductTemplateData
 
-		err := rows.Scan(&estimateItem.LineItemID, &estimateItem.EstimateID, &estimateItem.ProductID, &estimateItem.Quantity)
+		err := rows.Scan(&estimateProduct.EstimateItem.LineItemID, &estimateProduct.EstimateItem.ProductID, &estimateProduct.EstimateItem.Quantity, &estimateProduct.Product.Name, &estimateProduct.Product.Description, &estimateProduct.Product.Category, &estimateProduct.Product.Subcategory, &estimateProduct.Product.Color, &estimateProduct.Product.UnitPrice)
 		if err != nil {
 			return nil, err
 		}
 
-		estimateItems = append(estimateItems, estimateItem)
+		estimateProducts = append(estimateProducts, estimateProduct)
 
 	}
 
-	return estimateItems, nil
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return estimateProducts, nil
 }
 
 func (m *EstimateItemModel) Update(estimateItem EstimateItem) error {

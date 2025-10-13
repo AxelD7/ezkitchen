@@ -4,3 +4,9 @@ tmp/build-errors.log
 tmp/main
 ezkitchen-docs/
 ezkitchen-bruno/
+/node_modules
+package.json
+package-lock.json
+.prettierrc
+.prettierignore
+.vscode/

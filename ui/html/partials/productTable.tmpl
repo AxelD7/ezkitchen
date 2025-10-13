@@ -1,0 +1,20 @@
+{{ define "productTable" }}
+    <table class="product-table">
+        <tr class="product-table-header">
+            <th>Name</th>
+            <th>Description</th>
+            <th>Color</th>
+            <th>Price</th>
+        </tr>
+        <tr id="{{ .EstimateItem.LineItemID }}">
+            <td>{{ .Product.Name }}</td>
+            <td>{{ .Product.Description }}</td>
+            <td>{{ .Product.Color }}</td>
+            <td>${{ printf "%.2f" .Product.UnitPrice }}</td>
+            <td>
+                <input type="number" value="{{ .EstimateItem.Quantity }}" />
+            </td>
+            <td><button class="delete-prod-btn">delete item</button></td>
+        </tr>
+    </table>
+{{ end }}

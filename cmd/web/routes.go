@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 	mux.HandleFunc("GET /estimate/edit/{id}", app.estimateEditView)
 	mux.HandleFunc("POST /estimate/create", app.estimateCreatePost)
 	mux.HandleFunc("POST /estimate/update", app.estimateUpdate)
+	mux.HandleFunc("POST /estimate/edit/{id}/add-product/", app.addProductsToEstimate)
 
 	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
 

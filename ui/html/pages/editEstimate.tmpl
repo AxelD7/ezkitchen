@@ -1,121 +1,236 @@
-{{define "header-tags"}}
-<link rel="stylesheet" href="/static/css/main.css">
-<link rel="stylesheet" href="/static/css/estimates/edit-estimate.css">
-{{end}}
+{{ define "header-tags" }}
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="/static/css/estimates/edit-estimate.css" />
+{{ end }}
 
-{{define "script-tags"}}
-<script src="/static/js/estimates/edit-estimate.js"></script>
-{{end}}
+{{ define "script-tags" }}
+    <script src="/static/js/estimates/edit-estimate.js"></script>
+{{ end }}
 
+{{ define "content" }}
+    <div class="main-section">
+        <dialog class="product-modal" id="product-modal"></dialog>
 
-{{define "content"}}
+        <!-- Customer Info -->
+        <div class="customer-section">
+            <h3>Customer: {{ .Customer.Name }}</h3>
+            <p>
+                Address:
+                {{ .Estimate.Street }}
+                {{ .Estimate.City }}
+                {{ .Estimate.State }}
+                {{ .Estimate.Zip }}
+            </p>
+            <p>Contact: {{ .Customer.Phone }}</p>
 
-<div class="main-section">
+            <table class="kitchen-details">
+                <caption>
+                    Kitchen Details
+                </caption>
+                <tr>
+                    <td>Length:</td>
+                    <td>{{ .Estimate.KitchenLengthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Width:</td>
+                    <td>{{ .Estimate.KitchenWidthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Height:</td>
+                    <td>{{ .Estimate.KitchenHeightInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Door Width:</td>
+                    <td>{{ .Estimate.DoorWidthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Door Height:</td>
+                    <td>{{ .Estimate.DoorHeightInch }}in</td>
+                </tr>
+            </table>
+        </div>
 
-    <dialog class="product-modal" id="product-modal"></dialog>
-    <div class="customer-section">
-        <h3>Customer: {{.Customer.Name}}</h3>
-        <p>Address: {{.Estimate.Street}} {{.Estimate.City}} {{.Estimate.State}} {{.Estimate.Zip}}</p>
-        <p>Contact: {{.Customer.Phone}}</p>
-        <table class="kitchen-details">
-            <caption>Kitchen Details</caption>
-            <tr>
-                <td>Length: </td>
-                <td>{{.Estimate.KitchenLengthInch}}in</td>
-            </tr>
-            <tr>
-                <td>Width: </td>
-                <td>{{.Estimate.KitchenWidthInch}}in</td>
-            </tr>
-            <tr>
-                <td>Height: </td>
-                <td>{{.Estimate.KitchenHeightInch}}in</td>
-            </tr>
-            <tr>
-                <td>Door Width: </td>
-                <td>{{.Estimate.DoorWidthInch}}in</td>
-            </tr>
-            <tr>
-                <td>Door Height: </td>
-                <td>{{.Estimate.DoorHeightInch}}in</td>
-            </tr>
-        </table>
+        <!-- Estimate Items -->
+        <div class="items-section">
+            <h1>Estimate Line Items</h1>
 
+            <!-- Appliances -->
+            <button class="accordion">Appliances</button>
+            <div class="panel">
+                <!-- Stoves -->
+                <button class="subcategory-accordion">Stoves</button>
+                <div class="subcategory-panel" id="Stove">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Stove" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Appliances">
+                            Add a Stove
+                        </button>
+                    {{ end }}
+                </div>
+
+                <!-- Refrigerators -->
+                <button class="subcategory-accordion">Refrigerators</button>
+                <div class="subcategory-panel" id="Refrigerator">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Refrigerator" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Appliances">
+                            Add a Fridge
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Cabinetry -->
+            <button class="accordion">Cabinetry</button>
+            <div class="panel">
+                <button class="subcategory-accordion">Base Cabinets</button>
+                <div class="subcategory-panel" id="Base Cabinet">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Base Cabinet" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Cabinetry">
+                            Add a Cabinet
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Countertops -->
+            <button class="accordion">Countertops</button>
+            <div class="panel">
+                <div class="subcategory-panel" id="Countertop">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Countertop" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn">
+                            Add a Countertop
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Sinks & Faucets -->
+            <button class="accordion">Sinks & Faucets</button>
+            <div class="panel">
+                <!-- Sinks -->
+                <button class="subcategory-accordion">Sinks</button>
+                <div class="subcategory-panel" id="Sink">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Sink" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn">Add a Sink</button>
+                    {{ end }}
+                </div>
+
+                <!-- Faucets -->
+                <button class="subcategory-accordion">Faucets</button>
+                <div class="subcategory-panel" id="Faucet">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Faucet" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn">Add a Faucet</button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Flooring -->
+            <button class="accordion">Flooring</button>
+            <div class="panel">
+                <div class="subcategory-panel" id="Flooring">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Flooring" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Flooring">
+                            Choose your flooring
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Backsplash -->
+            <button class="accordion">Backsplash</button>
+            <div class="panel">
+                <div class="subcategory-panel" id="Backsplash">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Backsplash" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Backsplash">
+                            Add a Backsplash
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+
+            <!-- Misc -->
+            <button class="accordion">Misc</button>
+            <div class="panel">
+                <div class="subcategory-panel" id="Misc">
+                    {{ $found := false }}
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Misc" }}
+                            {{ $found = true }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                    {{ if not $found }}
+                        <button class="add-product-btn" id="Misc">
+                            Add any Miscellaneous Items
+                        </button>
+                    {{ end }}
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="summary-section">
+            <h1>Estimate Summary</h1>
+            <h3>Estimate ID: {{ .Estimate.EstimateID }}</h3>
+            <p>Sub-Total:</p>
+            <p>Labor Cost:</p>
+            <p>Sales Tax:</p>
+            <p>Estimate Total:</p>
+        </div>
     </div>
-
-    <div class="items-section">
-        <h1>Estimate Line Items</h1>
-        <button class="accordion">Appliances</button>
-        <div class="panel">
-            <button class="subcategory-accordion">Stoves</button>
-            <div class="subcategory-panel" id="Stove">
-                <button class="add-product-btn" id="Appliances">Add a Stove</button>
-            </div>
-            <button class="subcategory-accordion">Refridgerator</button>
-            <div class="subcategory-panel" id="Refrigerator">
-                <button class="add-product-btn" id="Appliances">Add a Fridge</button>
-            </div>
-        </div>
-        <button class="accordion">Cabinetry</button>
-        <div class="panel">
-            <button class="subcategory-accordion">Base Cabinet</button>
-            <div class="subcategory-panel" id="Base Cabinet">
-                <button class="add-product-btn" id="Cabinetry">Add a Cabinet</button>
-            </div>
-        </div>
-
-        <button class="accordion">Countertops</button>
-        <div class="panel">
-            <div class="subcategory-panel" id="Countertop">
-                <button class="add-product-btn">Add a Countertop</button>
-
-            </div>
-        </div>
-
-        <button class="accordion">Sinks & Faucets</button>
-        <div class="panel">
-            <button class="subcategory-accordion">Sinks</button>
-            <div class="subcategory-panel" id="Sink">
-                <button class="add-product-btn">Add a sink</button>
-            </div>
-            <button class="subcategory-accordion">Faucets</button>
-            <div class="subcategory-panel" id="Faucet">
-                <button class="add-product-btn">Add a Faucet</button>
-            </div>
-        </div>
-
-        <button class="accordion">Flooring</button>
-        <div class="panel">
-            <div class="subcategory-panel">
-                <button class="add-product-btn" id="Flooring">Choose your flooring</button>
-            </div>
-        </div>
-
-        <button class="accordion">Backsplash</button>
-        <div class="panel">
-            <div class="subcategory-panel">
-                <button class="add-product-btn" id="Backsplash">Add a Backsplash</button>
-
-            </div>
-        </div>
-
-        <button class="accordion">Misc</button>
-        <div class="panel">
-            <div class="subcategory-panel">
-                <button class="add-product-btn" id="Misc">Add any Miscellanious Items</button>
-
-            </div>
-        </div>
-    </div>
-    <div class="summary-section">
-        <h1>Estimate Summary</h1>
-        <h3>Estimate ID: {{.Estimate.EstimateID}}</h3>
-        <p>Sub-Total: </p>
-        <p>Labor Cost: </p>
-        <p>Sales Tax: </p>
-        <p>Estimate Total:</p>
-    </div>
-</div>
-
-
-{{end}}
+{{ end }}

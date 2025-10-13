@@ -13,8 +13,7 @@ import (
 type templateData struct {
 	Estimate models.Estimate
 	Customer models.User
-	Product  models.Product
-	Products []models.Product
+	Products []models.ProductTemplateData
 }
 
 // newTemplateCache is a function that runs on server start. This function parses any pages/partial/modals
