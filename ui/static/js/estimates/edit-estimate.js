@@ -43,7 +43,9 @@ function setupAddProductToEstimateBtn() {
     let addItemBtn = document.getElementsByClassName("add-item-btn")
     for (let i = 0; i < addItemBtn.length; i++) {
         addItemBtn[i].addEventListener("click", async function () {
-            const response = await fetch(`${document.URL}/add-product/`, {
+            estimateID =
+                document.querySelector(".estimate-ID").dataset.estimateId
+            const response = await fetch(`/estimate/${estimateID}/items/`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -62,6 +64,27 @@ function setupAddProductToEstimateBtn() {
     }
 }
 
+function setupDeleteBtn() {
+    let delProdBtn = document.getElementsByClassName("delete-prod-btn")
+    for (let i = 0; i < delProdBtn.length; i++) {
+        delProdBtn[i].addEventListener("click", async function () {
+            lineItemID = this.closest("tr").dataset.lineItemId
+            try {
+                const response = await fetch(`/estimate/items/${lineItemID}`, {
+                    method: "DELETE",
+                })
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`)
+                }
+                location.reload()
+            } catch {
+                console.Error(error.message)
+            }
+        })
+    }
+}
+
 setupAccordion("accordion", "block")
 setupAccordion("subcategory-accordion", "flex")
 setupAddProductBtn()
+setupDeleteBtn()

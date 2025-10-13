@@ -6,7 +6,7 @@
             <th>Color</th>
             <th>Price</th>
         </tr>
-        <tr id="{{ .EstimateItem.LineItemID }}">
+        <tr data-line-item-id="{{ .EstimateItem.LineItemID }}">
             <td>{{ .Product.Name }}</td>
             <td>{{ .Product.Description }}</td>
             <td>{{ .Product.Color }}</td>

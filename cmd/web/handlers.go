@@ -253,7 +253,7 @@ func (app *application) fetchProductsByFilters(w http.ResponseWriter, r *http.Re
 
 }
 
-func (app *application) addProductsToEstimate(w http.ResponseWriter, r *http.Request) {
+func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		http.NotFound(w, r)
@@ -274,6 +274,23 @@ func (app *application) addProductsToEstimate(w http.ResponseWriter, r *http.Req
 		app.serverError(w, r, err)
 		return
 	}
+	w.WriteHeader(http.StatusOK)
+
+}
+
+func (app *application) estimateDeleteItem(w http.ResponseWriter, r *http.Request) {
+	lineItemID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || lineItemID < 1 {
+		http.Error(w, "invalid line item id", http.StatusBadRequest)
+		return
+	}
+
+	err = app.estimateItems.Delete(lineItemID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 
 }
