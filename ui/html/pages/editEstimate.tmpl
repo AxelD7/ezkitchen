@@ -97,18 +97,26 @@
             <div class="panel">
                 <button class="subcategory-accordion">Base Cabinets</button>
                 <div class="subcategory-panel" id="Base Cabinet">
-                    {{ $found := false }}
                     {{ range .Products }}
                         {{ if eq .Product.Subcategory "Base Cabinet" }}
-                            {{ $found = true }}
                             {{ block "productTable" . }}{{ end }}
                         {{ end }}
                     {{ end }}
-                    {{ if not $found }}
-                        <button class="add-product-btn" id="Cabinetry">
-                            Add a Cabinet
-                        </button>
+                    <button class="add-product-btn" id="Cabinetry">
+                        Add a Base Cabinet
+                    </button>
+                </div>
+
+                <button class="subcategory-accordion">Upper Cabinets</button>
+                <div class="subcategory-panel" id="Upper Cabinet">
+                    {{ range .Products }}
+                        {{ if eq .Product.Subcategory "Upper Cabinet" }}
+                            {{ block "productTable" . }}{{ end }}
+                        {{ end }}
                     {{ end }}
+                    <button class="add-product-btn" id="Cabinetry">
+                        Add a Upper Cabinet
+                    </button>
                 </div>
             </div>
 
@@ -225,18 +233,7 @@
 
         <!-- Summary -->
         <div class="summary-section">
-            <h1>Estimate Summary</h1>
-            <h3
-                class="estimate-ID"
-                data-estimate-id="{{ .Estimate.EstimateID }}"
-            >
-                Estimate ID:
-                {{ .Estimate.EstimateID }}
-            </h3>
-            <p>Sub-Total:</p>
-            <p>Labor Cost:</p>
-            <p>Sales Tax:</p>
-            <p>Estimate Total:</p>
+            {{ template "estimateSummary" . }}
         </div>
     </div>
 {{ end }}

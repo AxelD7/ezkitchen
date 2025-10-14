@@ -58,16 +58,46 @@ function setupAddProductToEstimateBtn() {
             if (!response.ok) {
                 throw new Error(`Response Status: ${response.status}`)
             }
-            console.log(addItemBtn[i].id)
             location.reload()
         })
     }
 }
 
+function setupUpdateItemBtn() {
+    let saveItemBtn = document.getElementsByClassName("update-item-btn")
+
+    for (let i = 0; i < saveItemBtn.length; i++) {
+        saveItemBtn[i].addEventListener("click", async function () {
+            currentRow = this.closest("tr")
+            lineItemID = currentRow.dataset.lineItemId
+            newQuantity = Number(
+                currentRow.querySelector(".estimate-item-quantity").value,
+            )
+            try {
+                const response = await fetch(`/estimate/items/${lineItemID}`, {
+                    method: "PUT",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: {
+                        quantity: newQuantity,
+                    },
+                })
+                if (!response.ok) {
+                    throw new Error(`Response status: ${response.status}`)
+                }
+                location.reload()
+            } catch {
+                console.Error(error.message)
+            }
+        })
+    }
+}
+
 function setupDeleteBtn() {
-    let delProdBtn = document.getElementsByClassName("delete-prod-btn")
-    for (let i = 0; i < delProdBtn.length; i++) {
-        delProdBtn[i].addEventListener("click", async function () {
+    let delItemBtn = document.getElementsByClassName("delete-item-btn")
+    for (let i = 0; i < delItemBtn.length; i++) {
+        delItemBtn[i].addEventListener("click", async function () {
             lineItemID = this.closest("tr").dataset.lineItemId
             try {
                 const response = await fetch(`/estimate/items/${lineItemID}`, {
@@ -87,4 +117,5 @@ function setupDeleteBtn() {
 setupAccordion("accordion", "block")
 setupAccordion("subcategory-accordion", "flex")
 setupAddProductBtn()
+setupUpdateItemBtn()
 setupDeleteBtn()

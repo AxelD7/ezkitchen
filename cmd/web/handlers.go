@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-type addProductRequest struct {
+type productRequestBody struct {
 	ProductID int `json:"product_id"`
 	Quantity  int `json:"quantity"`
 }
@@ -260,7 +260,7 @@ func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	var req addProductRequest
+	var req productRequestBody
 	json.NewDecoder(r.Body).Decode(&req)
 
 	item := &models.EstimateItem{
@@ -276,6 +276,29 @@ func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) 
 	}
 	w.WriteHeader(http.StatusOK)
 
+}
+
+func (app *application) estimateUpdateItem(w http.ResponseWriter, r *http.Request) {
+	lineItemID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil {
+		http.Error(w, "invalid line item id", http.StatusBadRequest)
+		return
+	}
+	var req productRequestBody
+	json.NewDecoder(r.Body).Decode(&req)
+
+	estimateItem := models.EstimateItem{
+		LineItemID: lineItemID,
+		Quantity:   req.Quantity,
+	}
+
+	err = app.estimateItems.Update(estimateItem)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (app *application) estimateDeleteItem(w http.ResponseWriter, r *http.Request) {

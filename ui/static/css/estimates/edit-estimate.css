@@ -101,6 +101,7 @@ caption {
     padding: 0 18px;
     background-color: white;
     display: flex;
+    flex-direction: column;
     overflow: hidden;
     justify-content: center;
 }

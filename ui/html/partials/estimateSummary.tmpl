@@ -1,0 +1,11 @@
+{{ define "estimateSummary" }}
+    <h1>Estimate Summary</h1>
+    <h3 class="estimate-ID" data-estimate-id="{{ .Estimate.EstimateID }}">
+        Estimate ID:
+        {{ .Estimate.EstimateID }}
+    </h3>
+    <p>Sub-Total:</p>
+    <p>Labor Cost:</p>
+    <p>Sales Tax:</p>
+    <p>Estimate Total:</p>
+{{ end }}

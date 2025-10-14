@@ -76,8 +76,8 @@ func (m *EstimateItemModel) GetByEstimateID(id int) ([]ProductTemplateData, erro
 }
 
 func (m *EstimateItemModel) Update(estimateItem EstimateItem) error {
-	stmt := `UPDATE estimate_items SET estimate_id=$2, product_id=$3, quantity=$4 WHERE line_item_id=$1`
-	result, err := m.DB.Exec(stmt, estimateItem.LineItemID, estimateItem.EstimateID, estimateItem.ProductID, estimateItem.Quantity)
+	stmt := `UPDATE estimate_items SET quantity=$2 WHERE line_item_id=$1`
+	result, err := m.DB.Exec(stmt, estimateItem.LineItemID, estimateItem.Quantity)
 	if err != nil {
 		return err
 	}

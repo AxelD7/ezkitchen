@@ -12,9 +12,14 @@
             <td>{{ .Product.Color }}</td>
             <td>${{ printf "%.2f" .Product.UnitPrice }}</td>
             <td>
-                <input type="number" value="{{ .EstimateItem.Quantity }}" />
+                <input
+                    type="number"
+                    class="estimate-item-quantity"
+                    value="{{ .EstimateItem.Quantity }}"
+                />
             </td>
-            <td><button class="delete-prod-btn">delete item</button></td>
+            <td><button class="delete-item-btn">delete item</button></td>
+            <td><button class="update-item-btn">update item</button></td>
         </tr>
     </table>
 {{ end }}
