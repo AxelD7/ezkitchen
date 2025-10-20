@@ -73,9 +73,17 @@ type Estimate struct {
 	Zip               string
 }
 
+type EstimateTotals struct {
+	Subtotal      int
+	LaborTotal    int
+	SalesTax      int
+	EstimateTotal int
+}
+
 // EstimateModel wraps our sql.DB connection and allows for methods like Insert, Get, and Delete to work for estimates.
 type EstimateModel struct {
-	DB *sql.DB
+	DB    *sql.DB
+	Items *EstimateItemModel
 }
 
 // Insert creates a new estimate in the database and sets e.EstimateID.
@@ -213,4 +221,32 @@ func (m *EstimateModel) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (m *EstimateModel) CalculateEstimateTotals(estimateProducts []EstimateProduct) EstimateTotals {
+
+	var totals EstimateTotals
+	for i := 0; i < len(estimateProducts); i++ {
+		totals.Subtotal += estimateProducts[i].Product.UnitPrice * estimateProducts[i].EstimateItem.Quantity
+
+		switch estimateProducts[i].Product.Category {
+		case "Appliances":
+			totals.LaborTotal += 10000
+		case "Cabinetry":
+			totals.LaborTotal += 2500 * estimateProducts[i].EstimateItem.Quantity
+		case "Countertops":
+			totals.LaborTotal += 3000 * estimateProducts[i].EstimateItem.Quantity
+		case "Flooring":
+			totals.LaborTotal += 500 * estimateProducts[i].EstimateItem.Quantity
+		case "Sinks & Faucets":
+			totals.LaborTotal += 7500 * estimateProducts[i].EstimateItem.Quantity
+		}
+
+	}
+
+	totals.LaborTotal += 30000
+	totals.SalesTax = totals.Subtotal / 6
+	totals.EstimateTotal = totals.Subtotal + totals.SalesTax + totals.LaborTotal
+
+	return totals
 }

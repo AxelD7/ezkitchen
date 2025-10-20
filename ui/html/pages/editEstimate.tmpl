@@ -179,7 +179,7 @@
                 <div class="subcategory-panel" id="Flooring">
                     {{ $found := false }}
                     {{ range .Products }}
-                        {{ if eq .Product.Subcategory "Flooring" }}
+                        {{ if eq .Product.Category "Flooring" }}
                             {{ $found = true }}
                             {{ block "productTable" . }}{{ end }}
                         {{ end }}
@@ -198,7 +198,7 @@
                 <div class="subcategory-panel" id="Backsplash">
                     {{ $found := false }}
                     {{ range .Products }}
-                        {{ if eq .Product.Subcategory "Backsplash" }}
+                        {{ if eq .Product.Category "Backsplash" }}
                             {{ $found = true }}
                             {{ block "productTable" . }}{{ end }}
                         {{ end }}
@@ -217,7 +217,7 @@
                 <div class="subcategory-panel" id="Misc">
                     {{ $found := false }}
                     {{ range .Products }}
-                        {{ if eq .Product.Subcategory "Misc" }}
+                        {{ if eq .Product.Category "Misc" }}
                             {{ $found = true }}
                             {{ block "productTable" . }}{{ end }}
                         {{ end }}

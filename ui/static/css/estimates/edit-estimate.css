@@ -33,6 +33,8 @@ caption {
 
 .customer-section {
     display: block;
+    min-height: 350px;
+    height: fit-content;
 }
 
 .items-section {
@@ -46,7 +48,8 @@ caption {
 .summary-section {
     width: 20%;
     min-width: 20%;
-    height: 350px;
+    min-height: 350px;
+    height: fit-content;
     display: block;
 }
 
@@ -166,7 +169,7 @@ caption {
 
 .card {
     border: black solid;
-    height: 250px;
+    height: 275px;
     text-align: center;
 }
 
@@ -198,4 +201,14 @@ caption {
     width: 100%;
     border: 1px solid black;
     text-align: center;
+}
+
+.demo-charge-notice {
+    color: gray;
+    font-style: italic;
+    font-size: small;
+}
+
+input {
+    width: 75px;
 }

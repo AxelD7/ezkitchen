@@ -114,6 +114,8 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	estimateTotals := app.estimates.CalculateEstimateTotals(estimateProducts)
+
 	customer, err := app.users.Get(estimate.CustomerID)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -121,9 +123,10 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 	}
 
 	app.render(w, r, http.StatusOK, "editEstimate.tmpl", templateData{
-		Estimate: estimate,
-		Customer: customer,
-		Products: estimateProducts,
+		Estimate:       estimate,
+		Customer:       customer,
+		Products:       estimateProducts,
+		EstimateTotals: estimateTotals,
 	})
 
 	app.logger.Info(fmt.Sprintf("Viewing and editting the estimate with id %v", estimate.EstimateID))
@@ -180,7 +183,7 @@ func (app *application) productCreate(w http.ResponseWriter, r *http.Request) {
 	p := models.Product{
 		Name:        "32 Inch LG Fridge",
 		Description: "A fridge from lg that is 32 inches",
-		UnitPrice:   1200.99,
+		UnitPrice:   120099,
 		CreatedBy:   2,
 	}
 
@@ -200,7 +203,7 @@ func (app *application) productUpdate(w http.ResponseWriter, r *http.Request) {
 		ProductID:   1,
 		Name:        "28 Inch GE Fridge",
 		Description: "A fridge from GE that is 28 inches",
-		UnitPrice:   500.99,
+		UnitPrice:   50099,
 		CreatedBy:   2,
 	}
 

@@ -19,6 +19,9 @@ function setupAddProductBtn() {
             let category = this.id
             let subcat = this.closest(".subcategory-panel").id
             let color = ""
+            if (category == subcat) {
+                subcat = ""
+            }
             let url = `/product/get/?category=${category}&subcategory=${subcat}&color=${color}`
             console.log(addProductBtn[i].id)
             try {
@@ -45,6 +48,9 @@ function setupAddProductToEstimateBtn() {
         addItemBtn[i].addEventListener("click", async function () {
             estimateID =
                 document.querySelector(".estimate-ID").dataset.estimateId
+            quantity = this.closest(".card").querySelector(
+                ".card-product-quantity",
+            ).value
             const response = await fetch(`/estimate/${estimateID}/items/`, {
                 method: "POST",
                 headers: {
@@ -52,7 +58,7 @@ function setupAddProductToEstimateBtn() {
                 },
                 body: JSON.stringify({
                     product_id: parseInt(this.id),
-                    quantity: 1,
+                    quantity: parseInt(quantity),
                 }),
             })
             if (!response.ok) {
@@ -70,18 +76,19 @@ function setupUpdateItemBtn() {
         saveItemBtn[i].addEventListener("click", async function () {
             currentRow = this.closest("tr")
             lineItemID = currentRow.dataset.lineItemId
-            newQuantity = Number(
-                currentRow.querySelector(".estimate-item-quantity").value,
-            )
+            newQuantity = currentRow.querySelector(
+                ".estimate-item-quantity",
+            ).value
+
             try {
                 const response = await fetch(`/estimate/items/${lineItemID}`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",
                     },
-                    body: {
-                        quantity: newQuantity,
-                    },
+                    body: JSON.stringify({
+                        quantity: parseInt(newQuantity),
+                    }),
                 })
                 if (!response.ok) {
                     throw new Error(`Response status: ${response.status}`)

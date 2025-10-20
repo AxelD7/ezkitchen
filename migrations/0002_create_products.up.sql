@@ -5,6 +5,6 @@ CREATE TABLE IF NOT EXISTS products (
     category VARCHAR(50),
     subcategory VARCHAR(50),
     color        VARCHAR(20),
-    unit_price NUMERIC(12,2),
+    unit_price INT,
     created_by INT REFERENCES users(user_id)
 );

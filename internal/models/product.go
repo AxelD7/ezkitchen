@@ -12,7 +12,7 @@ type Product struct {
 	Category    string
 	Subcategory string
 	Color       string
-	UnitPrice   float64
+	UnitPrice   int
 	CreatedBy   int
 }
 

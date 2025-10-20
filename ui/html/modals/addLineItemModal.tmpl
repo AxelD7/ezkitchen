@@ -12,8 +12,16 @@
                 <div class="card">
                     <h3>{{ .Name }}</h3>
                     <p>{{ .Description }}</p>
-                    <p>{{ .Color }}</p>
-                    <p>${{ printf "%.2f" .UnitPrice }}</p>
+                    <p>Color: {{ .Color }}</p>
+                    <p>Unit Price: ${{ centsToDollars .UnitPrice 1 }}</p>
+                    <p>
+                        Quantity:
+                        <input
+                            type="number"
+                            value="1"
+                            class="card-product-quantity"
+                        />
+                    </p>
                     <button class="add-item-btn" id="{{ .ProductID }}">
                         +
                     </button>
