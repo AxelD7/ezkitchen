@@ -10,3 +10,5 @@ package-lock.json
 .prettierrc
 .prettierignore
 .vscode/
+/.stfolder
+.stignore

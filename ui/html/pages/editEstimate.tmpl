@@ -11,7 +11,6 @@
     <div class="main-section">
         <dialog class="product-modal" id="product-modal"></dialog>
 
-        <!-- Customer Info -->
         <div class="customer-section">
             <h3>Customer: {{ .Customer.Name }}</h3>
             <p>
@@ -50,15 +49,26 @@
             </table>
         </div>
 
-        <!-- Estimate Items -->
         <div class="items-section">
             <h1>Estimate Line Items</h1>
 
-            <!-- Appliances -->
-            <button class="accordion">Appliances</button>
+            <button class="accordion">
+                Appliances
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
-                <!-- Stoves -->
-                <button class="subcategory-accordion">Stoves</button>
+                <button class="subcategory-accordion">
+                    Stoves
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Stove">
                     {{ $found := false }}
                     {{ range .Products }}
@@ -74,8 +84,14 @@
                     {{ end }}
                 </div>
 
-                <!-- Refrigerators -->
-                <button class="subcategory-accordion">Refrigerators</button>
+                <button class="subcategory-accordion">
+                    Refrigerators
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Refrigerator">
                     {{ $found := false }}
                     {{ range .Products }}
@@ -92,10 +108,23 @@
                 </div>
             </div>
 
-            <!-- Cabinetry -->
-            <button class="accordion">Cabinetry</button>
+            <button class="accordion">
+                Cabinetry
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
-                <button class="subcategory-accordion">Base Cabinets</button>
+                <button class="subcategory-accordion">
+                    Base Cabinets
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Base Cabinet">
                     {{ range .Products }}
                         {{ if eq .Product.Subcategory "Base Cabinet" }}
@@ -107,7 +136,14 @@
                     </button>
                 </div>
 
-                <button class="subcategory-accordion">Upper Cabinets</button>
+                <button class="subcategory-accordion">
+                    Upper Cabinets
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Upper Cabinet">
                     {{ range .Products }}
                         {{ if eq .Product.Subcategory "Upper Cabinet" }}
@@ -120,8 +156,14 @@
                 </div>
             </div>
 
-            <!-- Countertops -->
-            <button class="accordion">Countertops</button>
+            <button class="accordion">
+                Countertops
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
                 <div class="subcategory-panel" id="Countertop">
                     {{ $found := false }}
@@ -139,11 +181,23 @@
                 </div>
             </div>
 
-            <!-- Sinks & Faucets -->
-            <button class="accordion">Sinks & Faucets</button>
+            <button class="accordion">
+                Sinks & Faucets
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
-                <!-- Sinks -->
-                <button class="subcategory-accordion">Sinks</button>
+                <button class="subcategory-accordion">
+                    Sinks
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Sink">
                     {{ $found := false }}
                     {{ range .Products }}
@@ -157,8 +211,14 @@
                     {{ end }}
                 </div>
 
-                <!-- Faucets -->
-                <button class="subcategory-accordion">Faucets</button>
+                <button class="subcategory-accordion">
+                    Faucets
+                    <img
+                        src="/static/images/icons/modal-drop-down.svg"
+                        alt="Toggle"
+                        class="accordion-icon"
+                    />
+                </button>
                 <div class="subcategory-panel" id="Faucet">
                     {{ $found := false }}
                     {{ range .Products }}
@@ -173,8 +233,14 @@
                 </div>
             </div>
 
-            <!-- Flooring -->
-            <button class="accordion">Flooring</button>
+            <button class="accordion">
+                Flooring
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
                 <div class="subcategory-panel" id="Flooring">
                     {{ $found := false }}
@@ -192,8 +258,14 @@
                 </div>
             </div>
 
-            <!-- Backsplash -->
-            <button class="accordion">Backsplash</button>
+            <button class="accordion">
+                Backsplash
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
                 <div class="subcategory-panel" id="Backsplash">
                     {{ $found := false }}
@@ -211,8 +283,14 @@
                 </div>
             </div>
 
-            <!-- Misc -->
-            <button class="accordion">Misc</button>
+            <button class="accordion">
+                Misc
+                <img
+                    src="/static/images/icons/modal-drop-down.svg"
+                    alt="Toggle"
+                    class="accordion-icon"
+                />
+            </button>
             <div class="panel">
                 <div class="subcategory-panel" id="Misc">
                     {{ $found := false }}
@@ -231,7 +309,6 @@
             </div>
         </div>
 
-        <!-- Summary -->
         <div class="summary-section">
             {{ template "estimateSummary" . }}
         </div>

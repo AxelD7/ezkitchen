@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,6 +27,14 @@ func (app *application) serverError(w http.ResponseWriter, r *http.Request, err 
 // clientError takes in the Response Writer, Request and Status to return any distinct error caused by the client.
 func (app *application) clientError(w http.ResponseWriter, r *http.Request, status int) {
 	http.Error(w, http.StatusText(status), status)
+}
+
+func (app *application) failedValidationJSON(w http.ResponseWriter, errors map[string]string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusBadRequest)
+	json.NewEncoder(w).Encode(map[string]any{
+		"errors": errors,
+	})
 }
 
 // ---FORM PARSING HELPERS---

@@ -1,13 +1,27 @@
 function setupAccordion(className, displayType) {
     let items = document.getElementsByClassName(className)
+
     for (let i = 0; i < items.length; i++) {
-        items[i].addEventListener("click", function () {
-            this.classList.toggle("active")
-            if (this.nextElementSibling.style.display == "none") {
-                this.nextElementSibling.style.display = displayType
-            } else {
-                this.nextElementSibling.style.display = "none"
-            }
+        const item = items[i]
+        const panel = item.nextElementSibling
+
+        if (!panel) continue
+
+        const key = className + "-" + i
+
+        const savedState = sessionStorage.getItem(key)
+        if (savedState === "open") {
+            item.classList.add("active")
+            panel.style.display = displayType
+        } else {
+            panel.style.display = "none"
+        }
+
+        item.addEventListener("click", function () {
+            const isOpen = panel.style.display === "none"
+            panel.style.display = isOpen ? displayType : "none"
+            this.classList.toggle("active", isOpen)
+            sessionStorage.setItem(key, isOpen ? "open" : "closed")
         })
     }
 }
@@ -40,31 +54,53 @@ function setupAddProductBtn() {
             }
         })
     }
+    document.addEventListener("click", (e) => {
+        if (e.target.closest("#modal-close-btn")) {
+            const modal = document.querySelector(".product-modal")
+            modal.close()
+        }
+    })
 }
 
 function setupAddProductToEstimateBtn() {
     let addItemBtn = document.getElementsByClassName("add-item-btn")
     for (let i = 0; i < addItemBtn.length; i++) {
         addItemBtn[i].addEventListener("click", async function () {
-            estimateID =
+            const estimateID =
                 document.querySelector(".estimate-ID").dataset.estimateId
-            quantity = this.closest(".card").querySelector(
+            const quantity = this.closest(".card").querySelector(
                 ".card-product-quantity",
             ).value
-            const response = await fetch(`/estimate/${estimateID}/items/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    product_id: parseInt(this.id),
-                    quantity: parseInt(quantity),
-                }),
-            })
-            if (!response.ok) {
-                throw new Error(`Response Status: ${response.status}`)
+            const productID = parseInt(this.id)
+
+            if (quantity < 1 || isNaN(quantity)) {
+                showInlineError(this, "Quantity must be at least 1.")
+                return
             }
-            location.reload()
+            try {
+                const response = await fetch(`/estimate/${estimateID}/items/`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        product_id: productID,
+                        quantity: parseInt(quantity),
+                    }),
+                })
+
+                if (!response.ok) {
+                    const data = await response.json().catch(() => ({}))
+                    if (data.errors) {
+                        handleProductErrors(this, data.errors)
+                        return
+                    }
+                    throw new Error(`Response Status: ${response.status}`)
+                }
+
+                location.reload()
+            } catch (error) {
+                alert("Something went wrong while adding the product.")
+                console.error(error.message)
+            }
         })
     }
 }
@@ -79,7 +115,10 @@ function setupUpdateItemBtn() {
             newQuantity = currentRow.querySelector(
                 ".estimate-item-quantity",
             ).value
-
+            if (newQuantity < 1 || isNaN(newQuantity)) {
+                alert("Quantity must be at least 1")
+                return
+            }
             try {
                 const response = await fetch(`/estimate/items/${lineItemID}`, {
                     method: "PUT",
@@ -119,6 +158,29 @@ function setupDeleteBtn() {
             }
         })
     }
+}
+function handleProductErrors(button, errors) {
+    document.querySelectorAll(".product-error").forEach((e) => e.remove())
+
+    if (errors.quantity) {
+        showInlineError(button, errors.quantity)
+    }
+
+    if (errors.product) {
+        showInlineError(button, errors.product)
+    }
+}
+
+function showInlineError(button, message) {
+    const quantityInput = button
+        .closest(".card")
+        .querySelector(".card-product-quantity")
+    const err = document.createElement("p")
+    err.className = "product-error"
+    err.style.color = "red"
+    err.style.margin = "5px 0 0 0"
+    err.textContent = message
+    quantityInput.insertAdjacentElement("afterend", err)
 }
 
 setupAccordion("accordion", "block")

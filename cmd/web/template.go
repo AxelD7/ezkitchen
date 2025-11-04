@@ -16,6 +16,7 @@ type templateData struct {
 	Customer       models.User
 	Products       []models.EstimateProduct
 	EstimateTotals models.EstimateTotals
+	Form           any
 }
 
 // newTemplateCache is a function that runs on server start. This function parses any pages/partial/modals

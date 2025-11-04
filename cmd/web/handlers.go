@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"ezkitchen/internal/models"
+	"ezkitchen/internal/validator"
 	"fmt"
 	"net/http"
 	"strconv"
@@ -14,6 +15,23 @@ import (
 type productRequestBody struct {
 	ProductID int `json:"product_id"`
 	Quantity  int `json:"quantity"`
+	validator.Validator
+}
+
+type estimateCreateForm struct {
+	Name          string
+	StreetAddress string
+	City          string
+	State         string
+	Zip           string
+	Email         string
+	Phone         string
+	Length        float32
+	Width         float32
+	Height        float32
+	DoorWidth     float32
+	DoorHeight    float32
+	validator.Validator
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -41,13 +59,62 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) estimateCreate(w http.ResponseWriter, r *http.Request) {
 
-	app.render(w, r, http.StatusOK, "createEstimate.tmpl", templateData{})
+	app.render(w, r, http.StatusOK, "createEstimate.tmpl", templateData{
+		Form: estimateCreateForm{},
+	})
 }
 
 func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		app.clientError(w, r, http.StatusBadRequest)
+	}
+
+	form := estimateCreateForm{
+		Name:          r.PostForm.Get("customerName"),
+		StreetAddress: r.PostForm.Get("streetAddress"),
+		City:          r.PostForm.Get("city"),
+		State:         r.PostForm.Get("state"),
+		Zip:           r.PostForm.Get("zip"),
+		Email:         r.PostForm.Get("email"),
+		Phone:         r.PostForm.Get("phone"),
+		Length:        app.formFloat32Parse(r, "kitchenLength"),
+		Width:         app.formFloat32Parse(r, "kitchenWidth"),
+		Height:        app.formFloat32Parse(r, "kitchenHeight"),
+		DoorWidth:     app.formFloat32Parse(r, "doorwayWidth"),
+		DoorHeight:    app.formFloat32Parse(r, "doorwayHeight"),
+	}
+
+	form.CheckField(validator.NotBlank(form.Name), "customerName", "This field cannot be blank.")
+	form.CheckField(validator.MaxChars(form.Name, 50), "customerName", "This field cannot be more than 50 characters long.")
+
+	form.CheckField(validator.NotBlank(form.StreetAddress), "streetAddress", "This field cannot be blank.")
+	form.CheckField(validator.MaxChars(form.StreetAddress, 50), "streetAddress", "This field cannot be more than 50 characters long.")
+
+	form.CheckField(validator.NotBlank(form.City), "city", "This field cannot be blank.")
+	form.CheckField(validator.MaxChars(form.City, 30), "city", "This field cannot be more than 30 characters long.")
+
+	form.CheckField(validator.NotBlank(form.Zip), "zip", "This field cannot be blank.")
+	form.CheckField(validator.MaxChars(form.Zip, 10), "zip", "This field cannot be more than 10 characters long.")
+
+	form.CheckField(validator.NotBlank(form.Email), "email", "This field cannot be blank.")
+	form.CheckField(validator.IsValidEmail(form.Email), "email", "Email must be in proper format. Ex: john.doe@example.com")
+
+	form.CheckField(validator.NotBlank(form.Phone), "phone", "This field cannot be blank.")
+	form.CheckField(validator.NotBlank(form.State), "state", "Please select a state.")
+
+	form.CheckField(validator.GreaterThanN(form.Length, float32(0)), "kitchenLength", "This value cannot be zero")
+	form.CheckField(validator.GreaterThanN(form.Width, float32(0)), "kitchenWidth", "This value cannot be zero")
+	form.CheckField(validator.GreaterThanN(form.Height, float32(0)), "kitchenHeight", "This value cannot be zero")
+	form.CheckField(validator.GreaterThanN(form.DoorWidth, float32(0)), "doorwayWidth", "This value cannot be zero")
+	form.CheckField(validator.GreaterThanN(form.DoorHeight, float32(0)), "doorwayHeight", "This value cannot be zero")
+
+	if !form.Valid() {
+		data := templateData{
+			Form: form,
+		}
+		app.render(w, r, http.StatusUnprocessableEntity, "createEstimate.tmpl", data)
+		return
 	}
 
 	customer := models.User{
@@ -272,6 +339,32 @@ func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) 
 		Quantity:   req.Quantity,
 	}
 
+	estimate, err := app.estimates.Get(item.EstimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+
+	}
+
+	product, err := app.products.Get(item.ProductID)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+
+	req.CheckField(validator.GreaterThanN(item.Quantity, 0), "quantity", "The quantity must be at least 1")
+
+	req.CheckField(
+		(product.Width <= estimate.DoorWidthInch+1 && product.Height <= estimate.DoorHeightInch+1) ||
+			(product.Length <= estimate.DoorWidthInch+1 && product.Height <= estimate.DoorHeightInch+1) ||
+			(product.Width <= estimate.DoorHeightInch+1 && product.Length <= estimate.DoorWidthInch+1),
+		"product",
+		"Product must have at least an one inch clearance of doorway width and height to fit through the doorway.",
+	)
+
+	if !req.Valid() {
+		app.failedValidationJSON(w, req.FieldErrors)
+		return
+	}
+
 	err = app.estimateItems.Insert(item)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -293,6 +386,13 @@ func (app *application) estimateUpdateItem(w http.ResponseWriter, r *http.Reques
 	estimateItem := models.EstimateItem{
 		LineItemID: lineItemID,
 		Quantity:   req.Quantity,
+	}
+
+	req.CheckField(validator.GreaterThanN(estimateItem.Quantity, 0), "quantity", "The quantity must be at least 1")
+
+	if !req.Valid() {
+		app.failedValidationJSON(w, req.FieldErrors)
+		return
 	}
 
 	err = app.estimateItems.Update(estimateItem)

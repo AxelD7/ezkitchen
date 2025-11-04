@@ -35,7 +35,7 @@ h1 {
   display: grid;
   grid-template-columns: 150px 1fr;
   gap: 10px 15px;
-  align-items: center;
+  align-items: start;
 }
 
 .customer-info {
@@ -45,6 +45,34 @@ h1 {
 
 .kitchen-details {
   padding-left: 20px;
+}
+
+.error {
+  color: #d93025;
+  font-size: 0.85rem;
+  font-weight: 500;
+  grid-column: 2;
+  line-height: 1.1;
+}
+
+.error:empty {
+  visibility: hidden;
+}
+
+input {
+  padding-bottom: 6px;
+}
+
+input.error-input {
+  border-color: #d93025;
+  background-color: #fff6f6;
+  box-shadow: 0 0 0 2px rgba(217, 48, 37, 0.2);
+}
+
+input.error-input:focus {
+  outline: none;
+  border-color: #b3271f;
+  box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.25);
 }
 
 .form-control {
@@ -60,18 +88,18 @@ h1 {
   padding: 7px 16px;
   min-height: 36px;
   min-width: 36px;
-  color: #333C4D;
-  background: #66CC8A;
+  color: #333c4d;
+  background: #66cc8a;
   border-radius: 4px;
   font-weight: 500;
   font-size: 14px;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px, rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 0px 0px,
+              rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
 }
 
 .submitButton:hover {
-  background: #00A96E;
+  background: #00a96e;
 }
-
 
 input[type=number] {
   -moz-appearance: textfield;
