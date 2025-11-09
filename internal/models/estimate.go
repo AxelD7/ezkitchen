@@ -86,7 +86,8 @@ type EstimateModel struct {
 	Items *EstimateItemModel
 }
 
-// Insert creates a new estimate in the database and sets e.EstimateID.
+// Insert creates a new estimate in the database and assigns the generated EstimateID to the provided struct.
+// Returns an error if the insert operation or Scan fails.
 func (m *EstimateModel) Insert(e *Estimate) error {
 	stmt := `INSERT INTO estimates 
 	(customer_id, created_by, status, created_at,
@@ -109,7 +110,8 @@ func (m *EstimateModel) Insert(e *Estimate) error {
 	return nil
 }
 
-// Get retrieves an estimate by ID or returns ErrNoRecord if none found.
+// Get retrieves an Estimate by its ID.
+// Returns ErrNoRecord if the specified record does not exist.
 func (m *EstimateModel) Get(id int) (Estimate, error) {
 	var estimate Estimate
 
@@ -125,18 +127,16 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return Estimate{}, ErrNoRecord
-		} else {
-			return Estimate{}, err
 		}
+		return Estimate{}, err
 	}
 	estimate.Status = EstimateStatus(statusInt)
 
 	return estimate, nil
-
 }
 
-// GetSurveyorsEstimates retrieves up to 10 estimate by the SurveyorID (Estimate.CreatedBy) or returns ErrNoRecord if none found
-// NOTE: This function has yet to be used and could potentially be changed in the future.
+// GetSurveyorsEstimates retrieves up to 10 estimates created by a specific surveyor (CreatedBy field).
+// Returns ErrNoRecord or an empty slice if no estimates are found.
 func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error) {
 	var estimates []Estimate
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
@@ -149,13 +149,11 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 		return nil, fmt.Errorf("no estimates were found - no rows returned")
 	} else if err != nil {
 		return nil, err
-
 	}
 
 	defer rows.Close()
 	for rows.Next() {
 		var estimate Estimate
-
 		var statusInt int
 		err = rows.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
 
@@ -171,8 +169,8 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 	return estimates, nil
 }
 
-// Update updates an estimate record in the database. The update sets ALL values in the table.
-// this function only returns errors.
+// Update modifies all fields of an existing Estimate record.
+// The Estimate struct must contain a valid EstimateID. Returns ErrNoRecord if the record does not exist.
 func (m *EstimateModel) Update(e *Estimate) error {
 	stmt := `UPDATE estimates
  	SET customer_id=$2, status=$3,
@@ -186,7 +184,6 @@ func (m *EstimateModel) Update(e *Estimate) error {
 		e.KitchenLengthInch, e.KitchenWidthInch, e.KitchenHeightInch,
 		e.DoorWidthInch, e.DoorHeightInch, e.Street, e.City, e.State, e.Zip,
 	)
-
 	if err != nil {
 		return err
 	}
@@ -199,15 +196,12 @@ func (m *EstimateModel) Update(e *Estimate) error {
 	}
 
 	return nil
-
 }
 
-// Delete removes an Estimate from the table based off of the ID.
-// This only returns Errors.
+// Delete removes an Estimate from the database using its ID.
+// Returns ErrNoRecord if the specified record does not exist.
 func (m *EstimateModel) Delete(id int) error {
-
 	stmt := `DELETE FROM estimates WHERE estimate_id=$1`
-
 	result, err := m.DB.Exec(stmt, id)
 	if err != nil {
 		return err
@@ -223,6 +217,9 @@ func (m *EstimateModel) Delete(id int) error {
 	return nil
 }
 
+// CalculateEstimateTotals computes the subtotal, labor, sales tax, and total for a given set of EstimateProducts.
+// Labor cost logic is based on product categories, and Michigan’s 6% sales tax is applied.
+// Returns an EstimateTotals struct with all calculated fields.
 func (m *EstimateModel) CalculateEstimateTotals(estimateProducts []EstimateProduct) EstimateTotals {
 
 	var totals EstimateTotals
@@ -241,7 +238,6 @@ func (m *EstimateModel) CalculateEstimateTotals(estimateProducts []EstimateProdu
 		case "Sinks & Faucets":
 			totals.LaborTotal += 7500 * estimateProducts[i].EstimateItem.Quantity
 		}
-
 	}
 
 	totals.LaborTotal += 30000

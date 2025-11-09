@@ -8,7 +8,7 @@ import (
 	"text/template"
 )
 
-// templateData contains keys and types for models of Estimate and Customers(users)
+// templateData contains keys and types for models of Estimate, users, products, estimate totals, and forms
 // in the future when multiple tables are required to load an estimate
 // (ie. Surveyor(user), Estimate, and Customer(user)) be sure to update this.
 type templateData struct {
@@ -20,7 +20,7 @@ type templateData struct {
 }
 
 // newTemplateCache is a function that runs on server start. This function parses any pages/partial/modals
-// templates used in our server to prevent repetitive code and frequent file parsing on each page load.
+// templates as well as any functions used within tmpl to prevent repetitive code and frequent file parsing on each page load.
 func newTemplateCache() (map[string]*template.Template, error) {
 
 	cache := map[string]*template.Template{}

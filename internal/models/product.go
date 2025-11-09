@@ -5,6 +5,8 @@ import (
 	"errors"
 )
 
+// Product represents a product record in the database.
+// It contains all descriptive and dimensional data for a given item.
 type Product struct {
 	ProductID   int
 	Name        string
@@ -19,10 +21,13 @@ type Product struct {
 	CreatedBy   int
 }
 
+// ProductModel wraps a sql.DB connection and provides methods for CRUD operations on products.
 type ProductModel struct {
 	DB *sql.DB
 }
 
+// Insert adds a new Product to the database and assigns the generated ProductID to the struct.
+// Returns an error if the insert or Scan operation fails.
 func (m *ProductModel) Insert(p *Product) error {
 	stmt := `
 		INSERT INTO products
@@ -45,6 +50,8 @@ func (m *ProductModel) Insert(p *Product) error {
 	).Scan(&p.ProductID)
 }
 
+// Get retrieves a Product by its ProductID.
+// Returns ErrNoRecord if the product does not exist.
 func (m *ProductModel) Get(id int) (Product, error) {
 	stmt := `
 		SELECT product_id, name, description, category, subcategory, color,
@@ -75,6 +82,9 @@ func (m *ProductModel) Get(id int) (Product, error) {
 	return p, nil
 }
 
+// GetByProductFilter retrieves a list of Products filtered by category, subcategory, or color.
+// Empty string values are treated as wildcards (i.e., no filter applied).
+// Returns a slice of Product or an error.
 func (m *ProductModel) GetByProductFilter(category, subcategory, color string) ([]Product, error) {
 	stmt := `
 		SELECT product_id, name, description, category, subcategory, color,
@@ -116,6 +126,9 @@ func (m *ProductModel) GetByProductFilter(category, subcategory, color string) (
 	return products, nil
 }
 
+// Update modifies an existing Product record in the database.
+// All fields are updated based on the provided Product struct.
+// Returns ErrNoRecord if the record does not exist.
 func (m *ProductModel) Update(p *Product) error {
 	stmt := `
 		UPDATE products
@@ -151,6 +164,8 @@ func (m *ProductModel) Update(p *Product) error {
 	return nil
 }
 
+// Delete removes a Product from the database by its ProductID.
+// Returns ErrNoRecord if the specified record does not exist.
 func (m *ProductModel) Delete(id int) error {
 	stmt := `DELETE FROM products WHERE product_id=$1`
 
