@@ -1,0 +1,48 @@
+{{ define "editProductTable" }}
+<table class="product-table">
+  <tr class="product-table-header">
+    <th>Name</th>
+    <th>Description</th>
+    <th>Color</th>
+    <th>Price</th>
+    {{ if or (eq .Product.Category "Flooring") (eq .Product.Category "Countertops") }}
+    <th>SqFt.</th>
+    {{ else }}
+    <th>Quantity</th>
+    {{
+      end
+    }}
+    {{ if eq .Estimate.Status.String "Draft" }}
+    <th>Actions</th>
+    {{
+      end
+    }}
+  </tr>
+  <tr data-line-item-id="{{ .EstimateItem.LineItemID }}">
+    <td>{{ .Product.Name }}</td>
+    <td>{{ .Product.Description }}</td>
+    <td>{{ .Product.Color }}</td>
+    <td>${{ centsToDollars.Product.UnitPrice.EstimateItem.Quantity }}</td>
+
+    {{ if eq .Estimate.Status.String "Draft" }}
+    <td>
+      <input
+        type="number"
+        class="estimate-item-quantity"
+        value="{{ .EstimateItem.Quantity }}"
+      />
+    </td>
+    <td>
+      <button class="save-item-btn">Save Item</button>
+    </td>
+    <td>
+      <button class="delete-item-btn">Delete Item</button>
+    </td>
+    {{ else }}
+    <td>{{ .EstimateItem.Quantity }}</td>
+    {{
+      end
+    }}
+  </tr>
+</table>
+{{ end }}

@@ -1,28 +1,71 @@
-body{
-    display: flex;
-    background-color: whitesmoke;
+body {
+  display: flex;
+  background-color: whitesmoke;
 }
 
 .sidebar {
-    height: 100%;
-    width: 15rem;
-    position: fixed;
-    z-index: 1;
-    top: 0;
-    left: 0;
-    background-color: #333C4D;
-    overflow-x: hidden;
-    padding-top: 100px;
+  height: 100%;
+  width: 15rem;
+  position: fixed;
+  z-index: 1;
+  top: 0;
+  left: 0;
+  background-color: #333c4d;
+  overflow-x: hidden;
+  padding-top: 100px;
 }
 
 .sidebar a {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 25px;
-    color: white;
-    display: block;
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: white;
+  display: block;
 }
 
 .sidebar a:hover {
-    background-color: #14181e;
+  background-color: #14181e;
+}
+
+.flash {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  font-weight: 500;
+  z-index: 1000;
+  opacity: 0;
+  animation: fadeInOut 4s ease forwards;
+}
+
+.flash.success {
+  background-color: #2ecc71; /* green */
+}
+
+.flash.error {
+  background-color: #e74c3c; /* red */
+}
+
+.flash.info {
+  background-color: #3498db; /* blue */
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  10%,
+  90% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
 }

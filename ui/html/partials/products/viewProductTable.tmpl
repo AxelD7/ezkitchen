@@ -1,0 +1,25 @@
+{{ define "viewProductTable" }}
+<table class="product-table">
+  <tr class="product-table-header">
+    <th>Name</th>
+    <th>Description</th>
+    <th>Color</th>
+    <th>Price</th>
+    {{ if or (eq .Product.Category "Flooring") (eq .Product.Category "Countertops") }}
+    <th>SqFt.</th>
+    {{ else }}
+    <th>Quantity</th>
+    {{
+      end
+    }}
+  </tr>
+  <tr data-line-item-id="{{ .EstimateItem.LineItemID }}">
+    <td>{{ .Product.Name }}</td>
+    <td>{{ .Product.Description }}</td>
+    <td>{{ .Product.Color }}</td>
+    <td>${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}</td>
+
+    <td>{{ .EstimateItem.Quantity }}</td>
+  </tr>
+</table>
+{{ end }}

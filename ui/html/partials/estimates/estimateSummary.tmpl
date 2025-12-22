@@ -1,0 +1,21 @@
+{{ define "estimateSummary" }}
+<h1>Estimate Summary</h1>
+
+<h3 class="estimate-ID" data-estimate-id="{{ .Estimate.EstimateID }}">
+  Estimate ID:
+  {{ .Estimate.EstimateID }}
+</h3>
+<p class="demo-charge-notice">
+  NOTE: Mandetory $300 labor charge included for demolition work and disposal.
+</p>
+<p>Sub-Total: ${{ centsToDollars .EstimateTotals.Subtotal 1 }}</p>
+
+<p>Labor Cost: ${{ centsToDollars .EstimateTotals.LaborTotal 1 }}</p>
+
+<p>Sales Tax: ${{ centsToDollars .EstimateTotals.SalesTax 1 }}</p>
+<p>Estimate Total: ${{ centsToDollars .EstimateTotals.EstimateTotal  1 }}</p>
+
+{{ if eq .Estimate.Status.String "Draft" }}
+<button class="submit-btn">Submit Estimate</button>
+{{ end }}
+{{ end }}

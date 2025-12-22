@@ -1,0 +1,73 @@
+.status-wrapper {
+    width: 60%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.status-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.status-step {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.status-counter {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid #999;
+    background-color: #fff;
+    color: #999;
+    font-weight: 600;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+.status-step.completed .status-counter {
+    background-color: #4bb543;
+    border-color: #4bb543;
+    color: #fff;
+}
+
+.status-step.current .status-counter {
+    background-color: #f1c40f;
+    border-color: #f1c40f;
+    color: #fff;
+}
+
+.status-step::before {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: -50%;
+    width: 100%;
+    border-bottom: 2px solid #ccc;
+    z-index: 1;
+}
+
+.status-step.completed::before {
+    border-bottom-color: #4bb543;
+}
+.status-step.current::before {
+    border-bottom-color: #4bb543;
+}
+
+.status-step:first-child::before {
+    content: none;
+}

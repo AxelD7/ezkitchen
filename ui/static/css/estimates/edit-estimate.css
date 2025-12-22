@@ -124,27 +124,50 @@ caption {
     flex-shrink: 0;
 }
 
-.add-product-btn {
+.add-product-btn,
+.add-item-btn,
+.add-btn {
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    text-align: center;
+    border: none;
+    padding: 10px 18px;
+    min-height: 44px;
+    min-width: 44px;
+    color: #333c4d;
+    background: #377cfb;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: rgba(0, 0, 0, 0.15) 0 2px 4px;
+    transition: background 0.2s, transform 0.1s;
+}
+
+.add-product-btn:hover,
+.add-item-btn:hover,
+.add-btn:hover {
+    background: #275cfb;
+    transform: translateY(-1px);
+}
+
+.submitBtn {
     display: inline-block;
     outline: 0;
     cursor: pointer;
     text-align: center;
     border: 0;
     padding: 7px 16px;
-    min-height: 48px;
-    min-width: 48px;
+    min-height: 36px;
+    min-width: 36px;
     color: #333c4d;
-    background: #377cfb;
+    background: #66cc8a;
     border-radius: 4px;
     font-weight: 500;
     font-size: 14px;
     box-shadow:
         rgba(0, 0, 0, 0.05) 0px 1px 0px 0px,
         rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
-}
-
-.add-product-btn:hover {
-    background: #374bfb;
 }
 
 .product-modal {
@@ -218,29 +241,6 @@ caption {
     justify-content: space-between;
 }
 
-.add-item-btn {
-    display: inline-block;
-    outline: 0;
-    cursor: pointer;
-    text-align: center;
-    border: 0;
-    padding: 7px 16px;
-    min-height: 48px;
-    min-width: 48px;
-    color: #333c4d;
-    background: #377cfb;
-    border-radius: 4px;
-    font-weight: 500;
-    font-size: 14px;
-    box-shadow:
-        rgba(0, 0, 0, 0.05) 0px 1px 0px 0px,
-        rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
-}
-
-.add-item-btn:hover {
-    background: #374bfb;
-}
-
 .search-box {
     width: 30%;
     margin: 1rem 0;
@@ -254,9 +254,7 @@ caption {
     border: 2px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .search-box input[type="text"]:focus {
@@ -279,4 +277,43 @@ caption {
 
 input {
     width: 75px;
+}
+.delete-item-btn {
+    background-color: #e74c3c;
+    color: #333c4d;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.delete-item-btn:hover {
+    background-color: #c0392b;
+    transform: scale(1.02);
+}
+
+.save-item-btn {
+    background-color: #66cc8a;
+    color: #333c4d;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.save-item-btn:hover {
+    background-color: #57b87a;
+    transform: scale(1.02);
 }

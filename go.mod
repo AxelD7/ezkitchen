@@ -1,6 +1,6 @@
 module ezkitchen
 
-go 1.24.3
+go 1.24.0
 
 require (
 	github.com/joho/godotenv v1.5.1
@@ -8,6 +8,8 @@ require (
 )
 
 require (
+	github.com/alexedwards/scs/v2 v2.9.0
+	github.com/go-playground/form/v4 v4.3.0
 	github.com/justinas/alice v1.2.0
 	github.com/testcontainers/testcontainers-go v0.40.0
 	github.com/testcontainers/testcontainers-go/modules/postgres v0.40.0
@@ -17,6 +19,7 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ansiterm v0.0.0-20210617225240-d185dfc1b5a1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
+	github.com/alexedwards/scs/postgresstore v0.0.0-20251002162104-209de6e426de
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect

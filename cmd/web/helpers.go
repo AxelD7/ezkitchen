@@ -6,10 +6,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+
+	"github.com/go-playground/form/v4"
 )
 
 // ---ERROR HANDLING HELPERS---
@@ -58,6 +61,26 @@ func (app *application) formFloat32Parse(r *http.Request, field string) float32 
 
 }
 
+func (app *application) decodePostForm(r *http.Request, dst any) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+
+	err = app.formDecoder.Decode(dst, r.PostForm)
+	if err != nil {
+		var invalidDecodeError *form.InvalidDecoderError
+
+		if errors.As(err, &invalidDecodeError) {
+			panic(err)
+		}
+
+		return err
+	}
+
+	return nil
+}
+
 // render is a function to render our templates(html) and any templateData when called in a handler function.
 // this function does a test render before actually writing to the response writer in the event of any errors they get
 // handled.
@@ -81,4 +104,16 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 	w.WriteHeader(status)
 
 	buf.WriteTo(w)
+}
+
+func (app *application) newTemplateData(r *http.Request) templateData {
+	var flash FlashMessage
+	val := app.sessionManager.Pop(r.Context(), "flash")
+	if val != nil {
+		flash = val.(FlashMessage)
+	}
+
+	return templateData{
+		Flash: flash,
+	}
 }

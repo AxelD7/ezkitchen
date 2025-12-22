@@ -1,0 +1,20 @@
+{{ define "header-tags" }}
+    <link rel="stylesheet" href="/static/css/main.css" />
+    <link rel="stylesheet" href="/static/css/estimates/view-estimate.css" />
+    <link rel="stylesheet" href="/static/css/estimates/status-bar.css" />
+    <link rel="stylesheet" href="/static/css/estimates/estimate-summary.css" />
+{{ end }}
+
+{{ define "script-tags" }}
+    <script src="/static/js/estimates/view-estimate.js"></script>
+{{ end }}
+{{ define "content" }}
+    {{ template "statusBar" . }}
+
+
+    <div class="main-section">
+        <div class="invoice-wrapper">
+            {{ template "invoiceBox" . }}
+        </div>
+    </div>
+{{ end }}
