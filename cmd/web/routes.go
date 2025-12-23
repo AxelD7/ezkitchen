@@ -13,25 +13,32 @@ func (app *application) routes() http.Handler {
 	fileServer := http.FileServer(http.Dir("./ui/static"))
 	mux.Handle("GET /static/", http.StripPrefix("/static", fileServer))
 
-	// --------------- Estimates ---------------
-	mux.HandleFunc("GET /{$}", app.home)
-	mux.HandleFunc("GET /estimate/view/{id}", app.estimateView)
-	mux.HandleFunc("GET /estimate/create", app.estimateCreate)
-	mux.HandleFunc("GET /estimate/edit/{id}", app.estimateEditView)
-	mux.HandleFunc("POST /estimate/create", app.estimateCreatePost)
-	mux.HandleFunc("POST /estimate/update", app.estimateUpdate)
-	mux.HandleFunc("POST /estimate/{id}/items/", app.estimateAddItem)
-	mux.HandleFunc("PUT /estimate/items/{id}", app.estimateUpdateItem)
-	mux.HandleFunc("DELETE /estimate/items/{id}", app.estimateDeleteItem)
+	dynamic := alice.New(app.sessionManager.LoadAndSave)
 
-	mux.HandleFunc("DELETE /estimate/delete/{id}", app.estimateDelete)
+	// --------------- Estimates ---------------
+	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
+	mux.Handle("GET /estimate/view/{id}", dynamic.ThenFunc(app.estimateView))
+	mux.Handle("GET /estimate/create", dynamic.ThenFunc(app.estimateCreate))
+	mux.Handle("GET /estimate/edit/{id}", dynamic.ThenFunc(app.estimateEditView))
+	mux.Handle("POST /estimate/create", dynamic.ThenFunc(app.estimateCreatePost))
+	mux.Handle("POST /estimate/update", dynamic.ThenFunc(app.estimateUpdate))
+	mux.Handle("POST /estimate/{id}/items/", dynamic.ThenFunc(app.estimateAddItem))
+	mux.Handle("POST /estimate/{id}/progress", dynamic.ThenFunc(app.progressEstimate))
+	mux.Handle("PUT /estimate/items/{id}", dynamic.ThenFunc(app.estimateUpdateItem))
+	mux.Handle("DELETE /estimate/items/{id}", dynamic.ThenFunc(app.estimateDeleteItem))
+
+	mux.Handle("DELETE /estimate/delete/{id}", dynamic.ThenFunc(app.estimateDelete))
 
 	// --------------- Products ---------------
-	mux.HandleFunc("GET /product/get/{id}", app.productGet)
-	mux.HandleFunc("GET /product/get/", app.fetchProductsByFilters)
-	mux.HandleFunc("POST /product/create", app.productCreate)
-	mux.HandleFunc("POST /product/update", app.productUpdate)
-	mux.HandleFunc("DELETE /product/delete", app.productDelete)
+	mux.Handle("GET /product/get/{id}", dynamic.ThenFunc(app.productGet))
+	mux.Handle("GET /product/get/", dynamic.ThenFunc(app.fetchProductsByFilters))
+	mux.Handle("POST /product/create", dynamic.ThenFunc(app.productCreate))
+	mux.Handle("POST /product/update", dynamic.ThenFunc(app.productUpdate))
+	mux.Handle("DELETE /product/delete", dynamic.ThenFunc(app.productDelete))
+
+	// --------------- Invoices ---------------
+
+	mux.Handle("GET /invoice/view/{id}", dynamic.ThenFunc(app.customerInvoiceView))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 

@@ -19,19 +19,19 @@ type productRequestBody struct {
 }
 
 type estimateCreateForm struct {
-	Name          string
-	StreetAddress string
-	City          string
-	State         string
-	Zip           string
-	Email         string
-	Phone         string
-	Length        float32
-	Width         float32
-	Height        float32
-	DoorWidth     float32
-	DoorHeight    float32
-	validator.Validator
+	Name                string  `form:"customerName"`
+	StreetAddress       string  `form:"streetAddress"`
+	City                string  `form:"city"`
+	State               string  `form:"state"`
+	Zip                 string  `form:"zip"`
+	Email               string  `form:"email"`
+	Phone               string  `form:"phone"`
+	Length              float32 `form:"kitchenLength"`
+	Width               float32 `form:"kitchenWidth"`
+	Height              float32 `form:"kitchenHeight"`
+	DoorWidth           float32 `form:"doorwayWidth"`
+	DoorHeight          float32 `form:"doorwayHeight"`
+	validator.Validator `form:"-"`
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
@@ -53,8 +53,29 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.serverError(w, r, err)
 	}
+	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	estimateTotals := app.estimates.CalculateEstimateTotals(estimateProducts)
+
+	customer, err := app.users.Get(estimate.CustomerID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Estimate = estimate
+	data.Customer = customer
+	data.Products = estimateProducts
+	data.EstimateTotals = estimateTotals
 
 	fmt.Printf("ESTIMATE OBJECT: %+v\n", estimate)
+
+	app.render(w, r, http.StatusOK, "viewEstimate.tmpl", data)
 }
 
 func (app *application) estimateCreate(w http.ResponseWriter, r *http.Request) {
@@ -65,24 +86,11 @@ func (app *application) estimateCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Request) {
-	err := r.ParseForm()
+	var form estimateCreateForm
+	err := app.decodePostForm(r, &form)
 	if err != nil {
 		app.clientError(w, r, http.StatusBadRequest)
-	}
-
-	form := estimateCreateForm{
-		Name:          r.PostForm.Get("customerName"),
-		StreetAddress: r.PostForm.Get("streetAddress"),
-		City:          r.PostForm.Get("city"),
-		State:         r.PostForm.Get("state"),
-		Zip:           r.PostForm.Get("zip"),
-		Email:         r.PostForm.Get("email"),
-		Phone:         r.PostForm.Get("phone"),
-		Length:        app.formFloat32Parse(r, "kitchenLength"),
-		Width:         app.formFloat32Parse(r, "kitchenWidth"),
-		Height:        app.formFloat32Parse(r, "kitchenHeight"),
-		DoorWidth:     app.formFloat32Parse(r, "doorwayWidth"),
-		DoorHeight:    app.formFloat32Parse(r, "doorwayHeight"),
+		return
 	}
 
 	form.CheckField(validator.NotBlank(form.Name), "customerName", "This field cannot be blank.")
@@ -110,18 +118,18 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 	form.CheckField(validator.GreaterThanN(form.DoorHeight, float32(0)), "doorwayHeight", "This value cannot be zero")
 
 	if !form.Valid() {
-		data := templateData{
-			Form: form,
-		}
+		data := app.newTemplateData(r)
+		data.Form = form
+
 		app.render(w, r, http.StatusUnprocessableEntity, "createEstimate.tmpl", data)
 		return
 	}
 
 	customer := models.User{
-		Name:         r.PostForm.Get("customerName"),
-		Email:        r.PostForm.Get("email"),
+		Name:         form.Name,
+		Email:        form.Email,
 		PasswordHash: "",
-		Phone:        r.PostForm.Get("phone"),
+		Phone:        form.Phone,
 		Role:         models.RoleCustomer,
 		CreatedAt:    time.Now(),
 	}
@@ -137,15 +145,15 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 		CreatedBy:         1,
 		Status:            models.StatusDraft,
 		CreatedAt:         time.Now(),
-		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
-		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),
-		KitchenHeightInch: app.formFloat32Parse(r, "kitchenHeight"),
-		DoorWidthInch:     app.formFloat32Parse(r, "doorwayWidth"),
-		DoorHeightInch:    app.formFloat32Parse(r, "doorwayHeight"),
-		Street:            r.PostForm.Get("street"),
-		City:              r.PostForm.Get("city"),
-		State:             r.PostForm.Get("state"),
-		Zip:               r.PostForm.Get("zip"),
+		KitchenLengthInch: form.Length,
+		KitchenWidthInch:  form.Width,
+		KitchenHeightInch: form.Height,
+		DoorWidthInch:     form.DoorWidth,
+		DoorHeightInch:    form.DoorHeight,
+		Street:            form.StreetAddress,
+		City:              form.City,
+		State:             form.State,
+		Zip:               form.Zip,
 	}
 
 	err = app.estimates.Insert(&estimate)
@@ -153,6 +161,11 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+		Type:    "success",
+		Message: "Estimate creation was successful!",
+	})
 
 	http.Redirect(w, r, fmt.Sprintf("/estimate/edit/%d", estimate.EstimateID), http.StatusSeeOther)
 
@@ -189,23 +202,85 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	app.render(w, r, http.StatusOK, "editEstimate.tmpl", templateData{
-		Estimate:       estimate,
-		Customer:       customer,
-		Products:       estimateProducts,
-		EstimateTotals: estimateTotals,
-	})
+	data := app.newTemplateData(r)
+	data.Estimate = estimate
+	data.Customer = customer
+	data.Products = estimateProducts
+	data.EstimateTotals = estimateTotals
+
+	app.render(w, r, http.StatusOK, "editEstimate.tmpl", data)
 
 	app.logger.Info(fmt.Sprintf("Viewing and editting the estimate with id %v", estimate.EstimateID))
 
 }
 
+func (app *application) progressEstimate(w http.ResponseWriter, r *http.Request) {
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		app.clientError(w, r, http.StatusBadRequest)
+		return
+	}
+
+	estimate, err := app.estimates.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
+		return
+	}
+
+	switch estimate.Status {
+	case models.StatusDraft:
+		ei, err := app.estimateItems.GetByEstimateID(id)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		if len(ei) == 0 {
+			app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+				Type:    "error",
+				Message: "You must add at least one product to the estimate before submitting!",
+			})
+			http.Redirect(
+				w, r,
+				fmt.Sprintf("/estimate/edit/%d", estimate.EstimateID),
+				http.StatusSeeOther,
+			)
+			return
+		}
+
+		//TODO: Add some type of email process to send the invoice link to the customer
+
+		err = app.estimates.UpdateStatus(id, estimate.Status.Next())
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+			Type:    "success",
+			Message: "Estimate submission was successful!",
+		})
+	}
+
+	http.Redirect(
+		w, r,
+		fmt.Sprintf("/estimate/view/%d", estimate.EstimateID),
+		http.StatusSeeOther,
+	)
+}
+
 func (app *application) estimateUpdate(w http.ResponseWriter, r *http.Request) {
 
 	estimate := models.Estimate{
+		EstimateID:        1,
 		CustomerID:        2,
 		CreatedBy:         2,
-		Status:            models.StatusDraft,
+		Status:            models.StatusAwaitingContractor,
 		CreatedAt:         time.Now(),
 		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
 		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),
@@ -309,7 +384,7 @@ func (app *application) fetchProductsByFilters(w http.ResponseWriter, r *http.Re
 	}
 	var buf bytes.Buffer
 
-	ts, ok := app.templateCache["addLineItemModal.tmpl"]
+	ts, ok := app.templateCache["modals/addLineItemModal.tmpl"]
 	if !ok {
 		app.logger.Error("the template addLineItemModal.tmpl does not exist")
 		http.Error(w, `{"status": "error", "message": "template not found"}`, http.StatusInternalServerError)
@@ -432,4 +507,41 @@ func (app *application) productDelete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fmt.Printf("PRODUCT WITH ID %v HAS BEEN DELETED", id)
+}
+
+func (app *application) customerInvoiceView(w http.ResponseWriter, r *http.Request) {
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	estimate, err := app.estimates.Get(id)
+	if err != nil {
+		app.serverError(w, r, err)
+	}
+	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	estimateTotals := app.estimates.CalculateEstimateTotals(estimateProducts)
+
+	customer, err := app.users.Get(estimate.CustomerID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+	data.Estimate = estimate
+	data.Customer = customer
+	data.Products = estimateProducts
+	data.EstimateTotals = estimateTotals
+
+	fmt.Printf("ESTIMATE OBJECT: %+v\n", estimate)
+
+	app.render(w, r, http.StatusOK, "customerInvoice.tmpl", data)
+
 }

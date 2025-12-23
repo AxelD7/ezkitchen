@@ -1,0 +1,51 @@
+{{ define "invoiceAgreementSummary" }}
+    <div class="agreement-box">
+        <h3>Agreement Summary</h3>
+
+        <h4 class="estimate-ID" data-estimate-id="{{ .Estimate.EstimateID }}">
+            Estimate ID:
+            {{ .Estimate.EstimateID }}
+        </h4>
+
+        <p class="demo-charge-notice">
+            NOTE: This is a demo application. No real services will be rendered
+            and no real charges will occur.
+        </p>
+
+        <div class="agreement-totals">
+            <p>
+                <span>Subtotal</span
+                ><span>${{ centsToDollars .EstimateTotals.Subtotal 1 }}</span>
+            </p>
+            <p>
+                <span>Labor Cost</span
+                ><span>${{ centsToDollars .EstimateTotals.LaborTotal 1 }}</span>
+            </p>
+            <p>
+                <span>Sales Tax</span
+                ><span>${{ centsToDollars .EstimateTotals.SalesTax 1 }}</span>
+            </p>
+            <p class="agreement-total">
+                <span>Total</span
+                ><span
+                    >${{ centsToDollars .EstimateTotals.EstimateTotal 1 }}</span
+                >
+            </p>
+        </div>
+
+        <label class="agreement-checkbox">
+            <input type="checkbox" id="agreement-checkbox" />
+            <span>
+                This is not a real agreement. For testing purposes only, check
+                this box to proceed. This is not a real invoice and no real
+                services will be rendered.
+            </span>
+        </label>
+
+        <button type="button" class="open-signature-btn">Add Signature</button>
+
+        <button type="submit" class="submit-agreement-btn">
+            Submit Agreement
+        </button>
+    </div>
+{{ end }}

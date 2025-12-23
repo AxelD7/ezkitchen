@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS estimates (
     estimate_id SERIAL PRIMARY KEY,
     customer_id INT REFERENCES users(user_id),
     created_by INT NOT NULL REFERENCES users(user_id),
-    status INT CHECK (status >= 1 AND status <= 6),
+    status INT CHECK (status >= 1 AND status <= 5),
     created_at TIMESTAMP,
     kitchen_length_inch DOUBLE PRECISION,
     kitchen_width_inch DOUBLE PRECISION,

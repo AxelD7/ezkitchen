@@ -8,13 +8,133 @@
 {{ define "script-tags" }}
     <script src="/static/js/estimates/view-estimate.js"></script>
 {{ end }}
+
 {{ define "content" }}
     {{ template "statusBar" . }}
 
 
     <div class="main-section">
-        <div class="invoice-wrapper">
-            {{ template "invoiceBox" . }}
+        <div class="customer-section">
+            <h3>Customer: {{ .Customer.Name }}</h3>
+            <p>
+                Address:
+                {{ .Estimate.Street }}
+                {{ .Estimate.City }}
+                {{ .Estimate.State }}
+                {{ .Estimate.Zip }}
+            </p>
+            <p>Contact: {{ .Customer.Phone }}</p>
+        </div>
+
+        <div class="items-section">
+            <h1>Estimate Line Items</h1>
+
+            {{ $found := false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Appliances" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Appliances</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Appliances" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Cabinetry" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Cabinetry</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Cabinetry" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Countertops" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Countertops</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Countertops" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Flooring" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Flooring</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Flooring" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Backsplash" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Backsplash</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Backsplash" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Misc" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <div class="accordion-section">
+                    <h2>Misc</h2>
+                    {{ range .Products }}
+                        {{ if eq .Product.Category "Misc" }}
+                            {{ block "viewProductTable" . }}{{ end }}
+                        {{ end }}
+                    {{ end }}
+                </div>
+            {{ end }}
+
+        </div>
+
+        <div class="summary-section">
+            {{ template "estimateSummary" . }}
         </div>
     </div>
 {{ end }}

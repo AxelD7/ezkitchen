@@ -6,6 +6,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/gob"
 	"ezkitchen/internal/models"
 	"flag"
 	"fmt"
@@ -13,18 +14,24 @@ import (
 	"net/http"
 	"os"
 	"text/template"
+	"time"
 
+	"github.com/alexedwards/scs/postgresstore"
+	"github.com/alexedwards/scs/v2"
+	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 )
 
 type application struct {
-	logger        *slog.Logger
-	estimates     *models.EstimateModel
-	products      *models.ProductModel
-	estimateItems *models.EstimateItemModel
-	users         *models.UserModel
-	templateCache map[string]*template.Template
+	logger         *slog.Logger
+	estimates      *models.EstimateModel
+	products       *models.ProductModel
+	estimateItems  *models.EstimateItemModel
+	users          *models.UserModel
+	templateCache  map[string]*template.Template
+	formDecoder    *form.Decoder
+	sessionManager *scs.SessionManager
 }
 
 func main() {
@@ -65,11 +72,20 @@ func main() {
 		os.Exit(1)
 	}
 
+	formDecoder := form.NewDecoder()
+
+	sessionManager := scs.New()
+	sessionManager.Store = postgresstore.New(db)
+	sessionManager.Lifetime = 12 * time.Hour
+	gob.Register(FlashMessage{})
+
 	app.estimates = &models.EstimateModel{DB: db}
 	app.products = &models.ProductModel{DB: db}
 	app.estimateItems = &models.EstimateItemModel{DB: db}
 	app.users = &models.UserModel{DB: db}
 	app.templateCache = templateCache
+	app.formDecoder = formDecoder
+	app.sessionManager = sessionManager
 
 	logger.Info("Starting server", "addr", *addr)
 

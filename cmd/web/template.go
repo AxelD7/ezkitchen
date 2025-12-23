@@ -100,6 +100,20 @@ func newTemplateCache() (map[string]*template.Template, error) {
 		}
 
 		cache[name] = ts
+
+	}
+
+	for _, modal := range modals {
+		name := filepath.Base(modal)
+
+		ts := template.New(name).Funcs(funcs)
+
+		ts, err = ts.ParseFiles(modal)
+		if err != nil {
+			return nil, err
+		}
+
+		cache["modals/"+name] = ts
 	}
 
 	return cache, nil

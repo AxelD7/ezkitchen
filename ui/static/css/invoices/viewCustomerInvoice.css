@@ -1,0 +1,142 @@
+/* Whole Page */
+main {
+    margin-left: 15rem;
+    width: calc(100% - 15rem);
+    padding: 2rem;
+}
+
+.main-section {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+}
+
+.invoice-wrapper {
+    width: 65%;
+    min-width: 65%;
+}
+
+.agreement-summary {
+    width: 35%;
+    min-width: 20rem;
+    position: sticky;
+    top: 2rem;
+}
+
+.invoice-box,
+.agreement-box {
+    background: white;
+    border: 2px solid black;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Invoice box */
+
+.invoice-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.invoice-title h2 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.invoice-title .muted {
+    color: gray;
+    font-size: 0.9rem;
+}
+
+.invoice-customer p {
+    margin: 0.25rem 0;
+    font-size: 0.95rem;
+}
+
+/* Invoice Table */
+
+.invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.invoice-table th {
+    text-align: left;
+    font-weight: bold;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid black;
+}
+
+.invoice-table td {
+    padding: 0.5rem 0;
+}
+
+.invoice-category-row td {
+    padding-top: 1.5rem;
+    font-weight: bold;
+    border-bottom: 1px solid black;
+}
+
+/* Agreeement box */
+
+.agreement-box h3 {
+    margin-top: 0;
+    font-size: 1.3rem;
+}
+
+.agreement-box h4 {
+    margin: 0.5rem 0 1rem;
+    font-size: 0.95rem;
+    font-weight: normal;
+}
+
+.agreement-totals p {
+    display: flex;
+    justify-content: space-between;
+    margin: 0.4rem 0;
+    font-size: 0.95rem;
+}
+
+.agreement-total {
+    font-weight: bold;
+    margin-top: 0.75rem;
+}
+
+.agreement-checkbox {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+    font-size: 0.9rem;
+}
+
+.agreement-box button {
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.75rem;
+    background: #66cc8a;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.agreement-box button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+    .main-section {
+        flex-direction: column;
+    }
+
+    .invoice-wrapper,
+    .agreement-summary {
+        width: 100%;
+        min-width: 100%;
+        position: static;
+    }
+}

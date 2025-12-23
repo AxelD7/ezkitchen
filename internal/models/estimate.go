@@ -15,10 +15,9 @@ import (
 // string literals throughout our code when a user is progressing through the project.
 // StatusDraft				-	1
 // StatusAwaitingPayment	-	2
-// StatusPaid				-	3
-// StatusAwaitingContractor -	4
-// StatusInProgress 		- 	5
-// StatusCompleted			- 	6
+// StatusAwaitingContractor -	3
+// StatusInProgress 		- 	4
+// StatusCompleted			- 	5
 type EstimateStatus int
 
 const (
@@ -41,8 +40,6 @@ func (s EstimateStatus) String() string {
 		return "Draft"
 	case StatusAwaitingPayment:
 		return "Awaiting Customer Payment"
-	case StatusPaid:
-		return "Paid"
 	case StatusAwaitingContractor:
 		return "Awaiting Contractor Agreement"
 	case StatusInProgress:
@@ -52,6 +49,14 @@ func (s EstimateStatus) String() string {
 	default:
 		return "Unknown"
 	}
+}
+
+func (s EstimateStatus) Next() EstimateStatus {
+	if s != StatusCompleted {
+		s++
+		return s
+	}
+	return s
 }
 
 // Estimate Struct is all the values held within the Estimate Database Object. Only values that cannot be null within
@@ -196,6 +201,15 @@ func (m *EstimateModel) Update(e *Estimate) error {
 	}
 
 	return nil
+}
+
+func (m *EstimateModel) UpdateStatus(id int, status EstimateStatus) error {
+
+	stmt := `UPDATE estimates set status=$1 WHERE estimate_id=$2`
+
+	_, err := m.DB.Exec(stmt, int(status), id)
+	return err
+
 }
 
 // Delete removes an Estimate from the database using its ID.

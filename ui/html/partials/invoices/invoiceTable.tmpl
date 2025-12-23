@@ -1,0 +1,157 @@
+{{ define "invoiceTable" }}
+    <table class="invoice-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th>Qty</th>
+                <th>Unit Price</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {{ $found := false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Appliances" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Appliances</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Appliances" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Cabinetry" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Cabinetry</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Cabinetry" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Countertops" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Countertops</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Countertops" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Flooring" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Flooring</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Flooring" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Backsplash" }}
+                    {{ $found = true }}
+                {{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Backsplash</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Backsplash" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+            {{ $found = false }}
+            {{ range .Products }}
+                {{ if eq .Product.Category "Misc" }}{{ $found = true }}{{ end }}
+            {{ end }}
+            {{ if $found }}
+                <tr class="invoice-category-row">
+                    <td colspan="4">Misc</td>
+                </tr>
+                {{ range .Products }}
+                    {{ if eq .Product.Category "Misc" }}
+                        <tr>
+                            <td>{{ .Product.Name }}</td>
+                            <td>{{ .EstimateItem.Quantity }}</td>
+                            <td>${{ centsToDollars .Product.UnitPrice 1 }}</td>
+                            <td>
+                                ${{ centsToDollars .Product.UnitPrice .EstimateItem.Quantity }}
+                            </td>
+                        </tr>
+                    {{ end }}
+                {{ end }}
+            {{ end }}
+
+        </tbody>
+    </table>
+{{ end }}
