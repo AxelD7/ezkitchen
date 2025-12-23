@@ -13,5 +13,6 @@ CREATE TABLE IF NOT EXISTS estimates (
     street VARCHAR(255),
     city VARCHAR(50),
     state VARCHAR(60),
-    zip VARCHAR(10)
+    zip VARCHAR(10),
+    signature_object_key TEXT
 );

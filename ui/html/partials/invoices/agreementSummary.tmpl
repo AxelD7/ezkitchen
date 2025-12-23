@@ -41,11 +41,21 @@
                 services will be rendered.
             </span>
         </label>
+        <div class="signature-preview" hidden>
+            <p class="muted">Signature preview:</p>
+            <img id="signature-preview-img" alt="Signature preview" />
+        </div>
 
         <button type="button" class="open-signature-btn">Add Signature</button>
-
-        <button type="submit" class="submit-agreement-btn">
-            Submit Agreement
-        </button>
+        <form
+            method="POST"
+            action="/signature/submit/{{ .Estimate.EstimateID }}"
+            enctype="multipart/form-data"
+        >
+            <input type="file" id="signature-file" name="signature" hidden />
+            <button type="submit" class="submit-agreement-btn">
+                Submit Agreement
+            </button>
+        </form>
     </div>
 {{ end }}

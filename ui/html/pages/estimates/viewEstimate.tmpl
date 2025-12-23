@@ -24,6 +24,32 @@
                 {{ .Estimate.Zip }}
             </p>
             <p>Contact: {{ .Customer.Phone }}</p>
+
+            <table class="kitchen-details">
+                <caption>
+                    Kitchen Details
+                </caption>
+                <tr>
+                    <td>Length:</td>
+                    <td>{{ .Estimate.KitchenLengthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Width:</td>
+                    <td>{{ .Estimate.KitchenWidthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Height:</td>
+                    <td>{{ .Estimate.KitchenHeightInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Door Width:</td>
+                    <td>{{ .Estimate.DoorWidthInch }}in</td>
+                </tr>
+                <tr>
+                    <td>Door Height:</td>
+                    <td>{{ .Estimate.DoorHeightInch }}in</td>
+                </tr>
+            </table>
         </div>
 
         <div class="items-section">

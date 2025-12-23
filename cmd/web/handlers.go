@@ -545,3 +545,69 @@ func (app *application) customerInvoiceView(w http.ResponseWriter, r *http.Reque
 	app.render(w, r, http.StatusOK, "customerInvoice.tmpl", data)
 
 }
+
+func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	id, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || id < 1 {
+		http.NotFound(w, r)
+		return
+	}
+
+	estimate, err := app.estimates.Get(id)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	if estimate.SignatureObjectKey.Valid {
+		app.clientError(w, r, http.StatusConflict)
+		return
+	}
+
+	err = r.ParseMultipartForm(1 << 20)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	file, header, err := r.FormFile("signature")
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	defer file.Close()
+
+	ct := header.Header.Get("Content-Type")
+	if ct != "image/png" {
+		app.clientError(w, r, http.StatusUnsupportedMediaType)
+		return
+	}
+	if header.Size > 512*1024 {
+		app.clientError(w, r, http.StatusRequestEntityTooLarge)
+		return
+	}
+
+	err = app.storage.UploadSignature(ctx, id, file, ct)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.estimates.SetSignatureKey(id, fmt.Sprintf("signatures/%d.png", id))
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	err = app.estimates.UpdateStatus(
+		id,
+		models.StatusAwaitingContractor,
+	)
+
+	http.Redirect(
+		w, r,
+		fmt.Sprintf("/invoice/view/%d", id),
+		http.StatusSeeOther,
+	)
+}

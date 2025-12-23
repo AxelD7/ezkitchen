@@ -62,20 +62,21 @@ func (s EstimateStatus) Next() EstimateStatus {
 // Estimate Struct is all the values held within the Estimate Database Object. Only values that cannot be null within
 // the DB are EstimateID and CreatedBy
 type Estimate struct {
-	EstimateID        int // primary key
-	CustomerID        int
-	CreatedBy         int // surveyor who creates the estimate.
-	Status            EstimateStatus
-	CreatedAt         time.Time
-	KitchenLengthInch float32
-	KitchenWidthInch  float32
-	KitchenHeightInch float32
-	DoorWidthInch     float32
-	DoorHeightInch    float32
-	Street            string
-	City              string
-	State             string
-	Zip               string
+	EstimateID         int // primary key
+	CustomerID         int
+	CreatedBy          int // surveyor who creates the estimate.
+	Status             EstimateStatus
+	CreatedAt          time.Time
+	KitchenLengthInch  float32
+	KitchenWidthInch   float32
+	KitchenHeightInch  float32
+	DoorWidthInch      float32
+	DoorHeightInch     float32
+	Street             string
+	City               string
+	State              string
+	Zip                string
+	SignatureObjectKey sql.NullString
 }
 
 type EstimateTotals struct {
@@ -122,12 +123,12 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 
 	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
        	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
-    	door_width_inch, door_height_inch, street, city, state, zip 
+    	door_width_inch, door_height_inch, street, city, state, zip, signature_object_key 
 	   	FROM estimates WHERE estimate_id=$1;`
 
 	var statusInt int
 	row := m.DB.QueryRow(stmt, id)
-	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+	err := row.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip, &estimate.SignatureObjectKey)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -201,6 +202,13 @@ func (m *EstimateModel) Update(e *Estimate) error {
 	}
 
 	return nil
+}
+func (m *EstimateModel) SetSignatureKey(id int, key string) error {
+	stmt := `UPDATE estimates set signature_object_key=$1 WHERE estimate_id=$2`
+
+	_, err := m.DB.Exec(stmt, key, id)
+	return err
+
 }
 
 func (m *EstimateModel) UpdateStatus(id int, status EstimateStatus) error {

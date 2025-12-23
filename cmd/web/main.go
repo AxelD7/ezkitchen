@@ -5,9 +5,11 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"encoding/gob"
 	"ezkitchen/internal/models"
+	"ezkitchen/internal/storage"
 	"flag"
 	"fmt"
 	"log/slog"
@@ -18,6 +20,10 @@ import (
 
 	"github.com/alexedwards/scs/postgresstore"
 	"github.com/alexedwards/scs/v2"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
@@ -29,6 +35,7 @@ type application struct {
 	products       *models.ProductModel
 	estimateItems  *models.EstimateItemModel
 	users          *models.UserModel
+	storage        *storage.R2Storage
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
@@ -65,6 +72,23 @@ func main() {
 	logger.Info(psqlStr)
 
 	defer db.Close()
+	// R2 Object Storage
+	r2AccessKeyID := os.Getenv("R2_ACCESS_KEY_ID")
+	r2SecretKey := os.Getenv("R2_SECRET_ACCESS_KEY")
+	r2Endpoint := os.Getenv("R2_ENDPOINT")
+	r2Bucket := os.Getenv("R2_BUCKET")
+
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(r2AccessKeyID, r2SecretKey, "")),
+		config.WithRegion("auto"))
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	client := s3.NewFromConfig(cfg, func(o *s3.Options) {
+		o.BaseEndpoint = aws.String(r2Endpoint)
+	})
 
 	templateCache, err := newTemplateCache()
 	if err != nil {
@@ -83,6 +107,7 @@ func main() {
 	app.products = &models.ProductModel{DB: db}
 	app.estimateItems = &models.EstimateItemModel{DB: db}
 	app.users = &models.UserModel{DB: db}
+	app.storage = storage.NewR2Storage(client, r2Bucket)
 	app.templateCache = templateCache
 	app.formDecoder = formDecoder
 	app.sessionManager = sessionManager
