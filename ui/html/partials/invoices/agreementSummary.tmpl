@@ -49,10 +49,18 @@
         <button type="button" class="open-signature-btn">Add Signature</button>
         <form
             method="POST"
-            action="/signature/submit/{{ .Estimate.EstimateID }}"
+            action="/invoice/sign"
             enctype="multipart/form-data"
         >
             <input type="file" id="signature-file" name="signature" hidden />
+            <input
+                type="hidden"
+                id="token"
+                name="token"
+                value="{{ .Token }}"
+                hidden
+            />
+
             <button type="submit" class="submit-agreement-btn">
                 Submit Agreement
             </button>

@@ -19,6 +19,7 @@ type templateData struct {
 	Products       []models.EstimateProduct
 	EstimateTotals models.EstimateTotals
 	Form           any
+	Token          string
 	Flash          FlashMessage
 }
 

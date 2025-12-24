@@ -86,6 +86,11 @@ type EstimateTotals struct {
 	EstimateTotal int
 }
 
+// Executor for any transaction based model methods (rollbacks on failure)
+type executor interface {
+	Exec(query string, args ...any) (sql.Result, error)
+}
+
 // EstimateModel wraps our sql.DB connection and allows for methods like Insert, Get, and Delete to work for estimates.
 type EstimateModel struct {
 	DB    *sql.DB
@@ -203,19 +208,36 @@ func (m *EstimateModel) Update(e *Estimate) error {
 
 	return nil
 }
+
 func (m *EstimateModel) SetSignatureKey(id int, key string) error {
+	return m.setSignatureKey(m.DB, id, key)
+}
+
+func (m *EstimateModel) SetSignatureKeyTx(tx *sql.Tx, id int, key string) error {
+	return m.setSignatureKey(m.DB, id, key)
+}
+
+func (m *EstimateModel) setSignatureKey(exec executor, id int, key string) error {
 	stmt := `UPDATE estimates set signature_object_key=$1 WHERE estimate_id=$2`
 
-	_, err := m.DB.Exec(stmt, key, id)
+	_, err := exec.Exec(stmt, key, id)
 	return err
 
 }
 
 func (m *EstimateModel) UpdateStatus(id int, status EstimateStatus) error {
+	return m.updateStatus(m.DB, id, status)
+}
+
+func (m *EstimateModel) UpdateStatusTx(tx *sql.Tx, id int, status EstimateStatus) error {
+	return m.updateStatus(tx, id, status)
+}
+
+func (m *EstimateModel) updateStatus(exec executor, id int, status EstimateStatus) error {
 
 	stmt := `UPDATE estimates set status=$1 WHERE estimate_id=$2`
 
-	_, err := m.DB.Exec(stmt, int(status), id)
+	_, err := exec.Exec(stmt, int(status), id)
 	return err
 
 }

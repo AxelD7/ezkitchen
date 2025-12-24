@@ -35,6 +35,7 @@ type application struct {
 	products       *models.ProductModel
 	estimateItems  *models.EstimateItemModel
 	users          *models.UserModel
+	invoiceToken   *models.InvoiceTokenModel
 	storage        *storage.R2Storage
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
@@ -107,6 +108,7 @@ func main() {
 	app.products = &models.ProductModel{DB: db}
 	app.estimateItems = &models.EstimateItemModel{DB: db}
 	app.users = &models.UserModel{DB: db}
+	app.invoiceToken = &models.InvoiceTokenModel{DB: db}
 	app.storage = storage.NewR2Storage(client, r2Bucket)
 	app.templateCache = templateCache
 	app.formDecoder = formDecoder

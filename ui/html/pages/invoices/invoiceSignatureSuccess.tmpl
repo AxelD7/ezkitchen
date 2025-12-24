@@ -1,0 +1,26 @@
+{{ define "title" }}Invoice Signed{{ end }}
+
+{{ define "header-tags" }}
+    <link
+        rel="stylesheet"
+        href="/static/css/invoices/invoice-signature-success.css"
+    />
+    <link rel="stylesheet" href="/static/css/main.css" />
+{{ end }}
+{{ define "script-tags" }}
+{{ end }}
+
+{{ define "content" }}
+    <div class="main-section">
+        <div class="invoice-status">
+            <h1>Invoice Signed Successfully</h1>
+
+            <p>
+                Thank you for signing the invoice. Your signature has been
+                recorded and the project will now move forward.
+            </p>
+
+            <p class="muted">You may safely close this page.</p>
+        </div>
+    </div>
+{{ end }}

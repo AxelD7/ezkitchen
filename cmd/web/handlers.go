@@ -253,13 +253,20 @@ func (app *application) progressEstimate(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		//TODO: Add some type of email process to send the invoice link to the customer
-
 		err = app.estimates.UpdateStatus(id, estimate.Status.Next())
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
+
+		rawToken, err := app.invoiceToken.Insert(id, (time.Now().Add(72 * time.Hour)))
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		customerUrl := fmt.Sprintf("/invoice/sign?token=%s", rawToken)
+		fmt.Println(customerUrl)
 
 		app.sessionManager.Put(r.Context(), "flash", FlashMessage{
 			Type:    "success",
@@ -509,16 +516,29 @@ func (app *application) productDelete(w http.ResponseWriter, r *http.Request) {
 	fmt.Printf("PRODUCT WITH ID %v HAS BEEN DELETED", id)
 }
 
-func (app *application) customerInvoiceView(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
+func (app *application) signInvoiceView(w http.ResponseWriter, r *http.Request) {
+
+	rawToken := r.URL.Query().Get("token")
+	if rawToken == "" {
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
 		return
 	}
 
-	estimate, err := app.estimates.Get(id)
+	it, err := app.invoiceToken.GetByRawToken(rawToken)
+	if err != nil {
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		return
+	}
+
+	if time.Now().After(it.ExpiresAt) || it.UsedAt.Valid {
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		return
+	}
+
+	estimate, err := app.estimates.Get(it.EstimateID)
 	if err != nil {
 		app.serverError(w, r, err)
+		return
 	}
 	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
 	if err != nil {
@@ -539,23 +559,37 @@ func (app *application) customerInvoiceView(w http.ResponseWriter, r *http.Reque
 	data.Customer = customer
 	data.Products = estimateProducts
 	data.EstimateTotals = estimateTotals
+	data.Token = rawToken
 
 	fmt.Printf("ESTIMATE OBJECT: %+v\n", estimate)
 
 	app.render(w, r, http.StatusOK, "customerInvoice.tmpl", data)
 
 }
-
 func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	id, err := strconv.Atoi(r.PathValue("id"))
-	if err != nil || id < 1 {
-		http.NotFound(w, r)
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	estimate, err := app.estimates.Get(id)
+	rawToken := r.FormValue("token")
+
+	it, err := app.invoiceToken.GetByRawToken(rawToken)
+	if err != nil {
+		app.clientError(w, r, http.StatusBadRequest)
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		return
+	}
+
+	if time.Now().After(it.ExpiresAt) || it.UsedAt.Valid {
+		data := app.newTemplateData(r)
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", data)
+		return
+	}
+
+	estimate, err := app.estimates.Get(it.EstimateID)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
@@ -579,35 +613,53 @@ func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) 
 	}
 	defer file.Close()
 
-	ct := header.Header.Get("Content-Type")
-	if ct != "image/png" {
-		app.clientError(w, r, http.StatusUnsupportedMediaType)
-		return
-	}
 	if header.Size > 512*1024 {
 		app.clientError(w, r, http.StatusRequestEntityTooLarge)
 		return
 	}
 
-	err = app.storage.UploadSignature(ctx, id, file, ct)
+	if header.Header.Get("Content-Type") != "image/png" {
+		app.clientError(w, r, http.StatusUnsupportedMediaType)
+		return
+	}
+
+	err = app.storage.UploadSignature(ctx, estimate.EstimateID, file, "image/png")
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
-	err = app.estimates.SetSignatureKey(id, fmt.Sprintf("signatures/%d.png", id))
+	tx, err := app.estimates.DB.Begin()
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
-	err = app.estimates.UpdateStatus(
-		id,
-		models.StatusAwaitingContractor,
-	)
+	defer tx.Rollback()
 
-	http.Redirect(
-		w, r,
-		fmt.Sprintf("/invoice/view/%d", id),
-		http.StatusSeeOther,
-	)
+	err = app.estimates.SetSignatureKeyTx(tx, estimate.EstimateID, fmt.Sprintf("signatures/%d.png", estimate.EstimateID))
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.estimates.UpdateStatusTx(tx, estimate.EstimateID, models.StatusAwaitingContractor)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = app.invoiceToken.MarkUsedTx(tx, it.InvoiceTokenID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	app.render(w, r, http.StatusOK, "invoiceSignatureSuccess.tmpl", app.newTemplateData(r))
+
 }

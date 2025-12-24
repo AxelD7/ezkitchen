@@ -1,0 +1,36 @@
+main {
+    margin-left: 15rem;
+    width: calc(100% - 15rem);
+    padding: 2rem;
+}
+.main-section {
+    display: flex;
+    justify-content: center;
+}
+
+.invoice-status {
+    width: 100%;
+    max-width: 600px;
+    background: white;
+    border: 2px solid black;
+    border-radius: 12px;
+    padding: 2.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.invoice-status h1 {
+    margin: 0 0 1rem;
+    font-size: 1.6rem;
+}
+
+.invoice-status p {
+    margin: 0.75rem 0;
+    font-size: 0.95rem;
+}
+
+.invoice-status .muted {
+    color: gray;
+    font-size: 0.9rem;
+    margin-top: 1.5rem;
+}

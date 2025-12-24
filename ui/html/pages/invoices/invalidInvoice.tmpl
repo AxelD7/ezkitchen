@@ -1,0 +1,19 @@
+{{ define "title" }}Invoice Link Invalid{{ end }}
+
+{{ define "header-tags" }}
+    <link rel="stylesheet" href="/static/css/invoices/invalid-invoice.css" />
+    <link rel="stylesheet" href="/static/css/main.css" />
+{{ end }}
+{{ define "script-tags" }}
+{{ end }}
+{{ define "content" }}
+    <div class="main-section">
+        <div class="invoice-status">
+            <h1>Invoice link unavailable</h1>
+            <p>
+                This invoice link is no longer valid. It may have expired or
+                already been used.
+            </p>
+        </div>
+    </div>
+{{ end }}
