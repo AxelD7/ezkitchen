@@ -40,7 +40,9 @@
         <!-- Completed -->
         <div
             class="status-step
-                {{ if eq $status "Completed" }}current{{ end }}"
+                {{ if eq $status "Completed" }}
+                completed
+            {{ end }}"
         >
             <div class="status-counter">4</div>
             <div class="status-name">Completed</div>

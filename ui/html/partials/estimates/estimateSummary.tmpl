@@ -26,5 +26,13 @@
         >
             <button class="submit-btn">Submit Estimate</button>
         </form>
+    {{ else if eq .Estimate.Status.String "In Progress" }}
+        <form
+            action="/estimate/{{ .Estimate.EstimateID }}/progress"
+            method="POST"
+        >
+            <button class="submit-btn">Complete Estimate</button>
+        </form>
     {{ end }}
+
 {{ end }}

@@ -293,6 +293,20 @@ func (app *application) progressEstimate(w http.ResponseWriter, r *http.Request)
 			Type:    "success",
 			Message: "Estimate submission was successful!",
 		})
+
+	case models.StatusInProgress:
+
+		err = app.estimates.UpdateStatus(id, estimate.Status.Next())
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+			Type:    "success",
+			Message: "Estimate completion was successful!",
+		})
+
 	}
 
 	http.Redirect(
