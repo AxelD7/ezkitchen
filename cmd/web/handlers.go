@@ -329,7 +329,7 @@ func (app *application) estimateUpdate(w http.ResponseWriter, r *http.Request) {
 		EstimateID:        1,
 		CustomerID:        2,
 		CreatedBy:         2,
-		Status:            models.StatusPaid,
+		Status:            models.StatusCompleted,
 		CreatedAt:         time.Now(),
 		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
 		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),

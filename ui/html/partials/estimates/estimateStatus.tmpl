@@ -6,8 +6,12 @@
         <!-- Draft -->
         <div
             class="status-step
-                {{ if eq $status "Draft" }}current{{ end }}
-                {{ if or (eq $status "Awaiting Customer") (eq $status "In Progress") (eq $status "Completed") }}
+            {{ if eq $status "Draft" }}current{{ end }}
+            {{ if or
+                (eq $status "Awaiting Customer Agreement")
+                (eq $status "In Progress")
+                (eq $status "Completed")
+            }}
                 completed
             {{ end }}"
         >
@@ -15,23 +19,26 @@
             <div class="status-name">Draft</div>
         </div>
 
-        <!-- Awaiting Customer -->
+        <!-- Awaiting Customer Agreement -->
         <div
             class="status-step
-                {{ if eq $status "Awaiting Customer" }}current{{ end }}
-                {{ if or (eq $status "In Progress") (eq $status "Completed") }}
+            {{ if eq $status "Awaiting Customer Agreement" }}current{{ end }}
+            {{ if or
+                (eq $status "In Progress")
+                (eq $status "Completed")
+            }}
                 completed
             {{ end }}"
         >
             <div class="status-counter">2</div>
-            <div class="status-name">Awaiting Customer</div>
+            <div class="status-name">Awaiting Customer Agreement</div>
         </div>
 
         <!-- In Progress -->
         <div
             class="status-step
-                {{ if eq $status "In Progress" }}current{{ end }}
-                {{ if eq $status "Completed" }}completed{{ end }}"
+            {{ if eq $status "In Progress" }}current{{ end }}
+            {{ if eq $status "Completed" }}completed{{ end }}"
         >
             <div class="status-counter">3</div>
             <div class="status-name">In Progress</div>
@@ -40,9 +47,7 @@
         <!-- Completed -->
         <div
             class="status-step
-                {{ if eq $status "Completed" }}
-                completed
-            {{ end }}"
+            {{ if eq $status "Completed" }}completed{{ end }}"
         >
             <div class="status-counter">4</div>
             <div class="status-name">Completed</div>

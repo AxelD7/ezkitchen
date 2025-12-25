@@ -22,10 +22,7 @@ type EstimateStatus int
 const (
 	StatusDraft EstimateStatus = iota + 1
 	// StatusAwaitingPayment - waiting for the customer to pay for the invoice
-	StatusAwaitingPayment
-	// StatusPaid - customer has paid
-	StatusPaid
-
+	StatusAwaitingAgreement
 	// StatusInProgress - the status of physical work being done as in literal work IN PROGRESS.
 	StatusInProgress
 	// StatusCompleted - all things complete job is done.
@@ -36,8 +33,8 @@ func (s EstimateStatus) String() string {
 	switch s {
 	case StatusDraft:
 		return "Draft"
-	case StatusAwaitingPayment:
-		return "Awaiting Customer Payment"
+	case StatusAwaitingAgreement:
+		return "Awaiting Customer Agreement"
 	case StatusInProgress:
 		return "In Progress"
 	case StatusCompleted:
