@@ -8,6 +8,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/gob"
+	"ezkitchen/internal/mailer"
 	"ezkitchen/internal/models"
 	"ezkitchen/internal/storage"
 	"flag"
@@ -40,6 +41,7 @@ type application struct {
 	templateCache  map[string]*template.Template
 	formDecoder    *form.Decoder
 	sessionManager *scs.SessionManager
+	mailer         *mailer.Mailer
 }
 
 func main() {
@@ -104,6 +106,12 @@ func main() {
 	sessionManager.Lifetime = 12 * time.Hour
 	gob.Register(FlashMessage{})
 
+	mailer, err := mailer.NewMailer()
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
 	app.estimates = &models.EstimateModel{DB: db}
 	app.products = &models.ProductModel{DB: db}
 	app.estimateItems = &models.EstimateItemModel{DB: db}
@@ -113,6 +121,7 @@ func main() {
 	app.templateCache = templateCache
 	app.formDecoder = formDecoder
 	app.sessionManager = sessionManager
+	app.mailer = mailer
 
 	logger.Info("Starting server", "addr", *addr)
 

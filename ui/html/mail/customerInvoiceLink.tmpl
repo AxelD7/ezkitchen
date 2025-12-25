@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Invoice Agreement</title>
+    </head>
+    <body>
+        <p>Hello {{ .CustomerName }},</p>
+
+        <p>
+            Your invoice agreement for estimate
+            <strong>#{{ .EstimateNumber }}</strong> is ready. Please review and
+            sign using the secure link below:
+        </p>
+
+        <p>
+            <a href="{{ .SignURL }}">{{ .SignURL }}</a>
+        </p>
+
+        <p>This link expires at: <strong>{{ .ExpiresAt }}</strong></p>
+    </body>
+</html>

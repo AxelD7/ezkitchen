@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"ezkitchen/internal/mailer"
 	"ezkitchen/internal/models"
 	"ezkitchen/internal/validator"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 )
@@ -259,14 +261,33 @@ func (app *application) progressEstimate(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		rawToken, err := app.invoiceToken.Insert(id, (time.Now().Add(72 * time.Hour)))
+		expiresAt := time.Now().Add(72 * time.Hour)
+		rawToken, err := app.invoiceToken.Insert(id, expiresAt)
 		if err != nil {
 			app.serverError(w, r, err)
 			return
 		}
 
-		customerUrl := fmt.Sprintf("/invoice/sign?token=%s", rawToken)
-		fmt.Println(customerUrl)
+		customer, err := app.users.Get(estimate.CustomerID)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		signURL := os.Getenv("APP_BASE_URL") + "/invoice/sign?token=" + rawToken
+
+		invoiceData := mailer.InvoiceLinkData{
+			CustomerName:   customer.Name,
+			EstimateNumber: estimate.EstimateID,
+			SignURL:        signURL,
+			ExpiresAt:      expiresAt.Format("Jan 2, 2006 3:04 PM")}
+
+		err = app.mailer.SendInvoiceLink(customer.Email, invoiceData)
+		if err != nil {
+			app.logger.Error("email send failed", "error", err)
+			app.serverError(w, r, err)
+			return
+		}
 
 		app.sessionManager.Put(r.Context(), "flash", FlashMessage{
 			Type:    "success",
