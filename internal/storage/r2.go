@@ -14,6 +14,16 @@ type R2Storage struct {
 	bucket string
 }
 
+type Object struct {
+	Body        io.ReadCloser
+	ContentType string
+	Size        int64
+}
+
+type Storage interface {
+	Get(ctx context.Context, key string) (*Object, error)
+}
+
 func NewR2Storage(client *s3.Client, bucket string) *R2Storage {
 	return &R2Storage{
 		client: client,
@@ -32,5 +42,23 @@ func (r *R2Storage) UploadSignature(ctx context.Context, estimateID int, body io
 	})
 
 	return err
+
+}
+
+func (r *R2Storage) Get(ctx context.Context, key string) (*Object, error) {
+
+	out, err := r.client.GetObject(ctx, &s3.GetObjectInput{
+		Bucket: aws.String(r.bucket),
+		Key:    aws.String(key),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &Object{
+		Body:        out.Body,
+		ContentType: aws.ToString(out.ContentType),
+		Size:        *out.ContentLength,
+	}, nil
 
 }

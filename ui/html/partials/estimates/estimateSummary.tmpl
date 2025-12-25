@@ -18,6 +18,15 @@
         Estimate Total:
         ${{ centsToDollars .EstimateTotals.EstimateTotal  1 }}
     </p>
+    {{ if .Estimate.SignatureObjectKey.Valid }}
+        <div class="signature-preview">
+            <img
+                src="/invoices/signature/{{ .Estimate.EstimateID }}"
+                alt="Customer signature"
+                class="signature-image"
+            />
+        </div>
+    {{ end }}
 
     {{ if eq .Estimate.Status.String "Draft" }}
         <form

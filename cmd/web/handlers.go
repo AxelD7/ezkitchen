@@ -8,6 +8,7 @@ import (
 	"ezkitchen/internal/models"
 	"ezkitchen/internal/validator"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
@@ -190,6 +191,12 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 			app.serverError(w, r, err)
 		}
 	}
+
+	if estimate.Status != models.StatusDraft {
+		app.clientError(w, r, http.StatusConflict)
+		return
+	}
+
 	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -604,11 +611,6 @@ func (app *application) signInvoiceView(w http.ResponseWriter, r *http.Request) 
 func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 
-	if r.Method != http.MethodPost {
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
-	}
-
 	rawToken := r.FormValue("token")
 
 	it, err := app.invoiceToken.GetByRawToken(rawToken)
@@ -696,5 +698,44 @@ func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) 
 	}
 
 	app.render(w, r, http.StatusOK, "invoiceSignatureSuccess.tmpl", app.newTemplateData(r))
+
+}
+
+func (app *application) getInvoiceSignature(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
+
+	estimateID, err := strconv.Atoi(r.PathValue("id"))
+	if err != nil || estimateID < 1 {
+		app.clientError(w, r, http.StatusBadRequest)
+		return
+	}
+
+	estimate, err := app.estimates.Get(estimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+	if !estimate.SignatureObjectKey.Valid {
+		app.clientError(w, r, http.StatusNotFound)
+		return
+	}
+
+	obj, err := app.storage.Get(ctx, estimate.SignatureObjectKey.String)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	defer obj.Body.Close()
+
+	w.Header().Set("Content-Type", obj.ContentType)
+	w.Header().Set("Content-Length", strconv.FormatInt(obj.Size, 10))
+	w.Header().Set("Cache-Control", "private, max-age=3600")
+
+	_, err = io.Copy(w, obj.Body)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
 
 }

@@ -40,6 +40,7 @@ func (app *application) routes() http.Handler {
 
 	mux.Handle("GET /invoice/sign", dynamic.ThenFunc(app.signInvoiceView))
 	mux.Handle("POST /invoice/sign", dynamic.ThenFunc(app.submitSignature))
+	mux.Handle("GET /invoices/signature/{id}", dynamic.ThenFunc(app.getInvoiceSignature))
 
 	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
 
