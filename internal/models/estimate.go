@@ -15,9 +15,8 @@ import (
 // string literals throughout our code when a user is progressing through the project.
 // StatusDraft				-	1
 // StatusAwaitingPayment	-	2
-// StatusAwaitingContractor -	3
-// StatusInProgress 		- 	4
-// StatusCompleted			- 	5
+// StatusInProgress 		- 	3
+// StatusCompleted			- 	4
 type EstimateStatus int
 
 const (
@@ -26,8 +25,7 @@ const (
 	StatusAwaitingPayment
 	// StatusPaid - customer has paid
 	StatusPaid
-	// StatusAwaitingContractor - Awaiting Contractor agreeing to completing the job
-	StatusAwaitingContractor
+
 	// StatusInProgress - the status of physical work being done as in literal work IN PROGRESS.
 	StatusInProgress
 	// StatusCompleted - all things complete job is done.
@@ -40,8 +38,6 @@ func (s EstimateStatus) String() string {
 		return "Draft"
 	case StatusAwaitingPayment:
 		return "Awaiting Customer Payment"
-	case StatusAwaitingContractor:
-		return "Awaiting Contractor Agreement"
 	case StatusInProgress:
 		return "In Progress"
 	case StatusCompleted:

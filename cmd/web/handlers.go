@@ -308,7 +308,7 @@ func (app *application) estimateUpdate(w http.ResponseWriter, r *http.Request) {
 		EstimateID:        1,
 		CustomerID:        2,
 		CreatedBy:         2,
-		Status:            models.StatusAwaitingContractor,
+		Status:            models.StatusPaid,
 		CreatedAt:         time.Now(),
 		KitchenLengthInch: app.formFloat32Parse(r, "kitchenLength"),
 		KitchenWidthInch:  app.formFloat32Parse(r, "kitchenWidth"),
@@ -663,7 +663,7 @@ func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = app.estimates.UpdateStatusTx(tx, estimate.EstimateID, models.StatusAwaitingContractor)
+	err = app.estimates.UpdateStatusTx(tx, estimate.EstimateID, models.StatusInProgress)
 	if err != nil {
 		app.serverError(w, r, err)
 		return
