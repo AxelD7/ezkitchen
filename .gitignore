@@ -1,7 +1,6 @@
 secrets.env
 .env
-tmp/build-errors.log
-tmp/main
+tmp/
 ezkitchen-docs/
 ezkitchen-bruno/
 /node_modules
@@ -12,3 +11,6 @@ package-lock.json
 .vscode/
 /.stfolder
 .stignore
+tls/cert.pem
+tls/key.pem
+

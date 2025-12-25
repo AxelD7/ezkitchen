@@ -6,6 +6,7 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"database/sql"
 	"encoding/gob"
 	"ezkitchen/internal/mailer"
@@ -48,13 +49,13 @@ func main() {
 
 	logger := slog.New(slog.NewTextHandler(os.Stdout, nil))
 
-	app := &application{
-		logger: logger,
-	}
-
 	// executing flags and loading environment variables.
 	addr := flag.String("addr", ":4000", "HTTP Network Address")
 	flag.Parse()
+
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
+	}
 
 	err := godotenv.Load(".env")
 	if err != nil {
@@ -112,20 +113,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	app.estimates = &models.EstimateModel{DB: db}
-	app.products = &models.ProductModel{DB: db}
-	app.estimateItems = &models.EstimateItemModel{DB: db}
-	app.users = &models.UserModel{DB: db}
-	app.invoiceToken = &models.InvoiceTokenModel{DB: db}
-	app.storage = storage.NewR2Storage(client, r2Bucket)
-	app.templateCache = templateCache
-	app.formDecoder = formDecoder
-	app.sessionManager = sessionManager
-	app.mailer = mailer
+	app := &application{
+		estimates:      &models.EstimateModel{DB: db},
+		products:       &models.ProductModel{DB: db},
+		estimateItems:  &models.EstimateItemModel{DB: db},
+		users:          &models.UserModel{DB: db},
+		invoiceToken:   &models.InvoiceTokenModel{DB: db},
+		storage:        storage.NewR2Storage(client, r2Bucket),
+		templateCache:  templateCache,
+		formDecoder:    formDecoder,
+		sessionManager: sessionManager,
+		mailer:         mailer,
+		logger:         logger,
+	}
+
+	srv := &http.Server{
+		Addr:         *addr,
+		Handler:      app.routes(),
+		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Second,
+		WriteTimeout: 10 * time.Second,
+	}
 
 	logger.Info("Starting server", "addr", *addr)
 
-	err = http.ListenAndServe(*addr, app.routes())
+	err = srv.ListenAndServeTLS("./tls/cert.pem", "./tls/key.pem")
 	logger.Error(err.Error())
 	os.Exit(1)
 
