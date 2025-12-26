@@ -22,6 +22,7 @@ type templateData struct {
 	Token           string
 	Flash           FlashMessage
 	IsAuthenticated bool
+	CSRFToken       string
 }
 
 type FlashMessage struct {

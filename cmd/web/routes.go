@@ -19,7 +19,7 @@ func (app *application) routes() http.Handler {
 	// --------------- Estimates ---------------
 	mux.Handle("GET /{$}", dynamic.ThenFunc(app.home))
 	mux.Handle("GET /estimate/view/{id}", protected.ThenFunc(app.estimateView))
-	mux.Handle("GET /estimate/create", protected.ThenFunc(app.estimateCreate))
+	mux.Handle("GET /estimate/create", protected.ThenFunc(app.estimateCreateView))
 	mux.Handle("GET /estimate/edit/{id}", protected.ThenFunc(app.estimateEditView))
 	mux.Handle("POST /estimate/create", protected.ThenFunc(app.estimateCreatePost))
 	mux.Handle("POST /estimate/update", protected.ThenFunc(app.estimateUpdate))
@@ -46,9 +46,9 @@ func (app *application) routes() http.Handler {
 	// --------------- Users ---------------
 	mux.Handle("GET /user/login", dynamic.ThenFunc(app.userLoginView))
 	mux.Handle("POST /user/login", dynamic.ThenFunc(app.userLogin))
-	mux.Handle("GET /user/logout", protected.ThenFunc(app.userLogout))
+	mux.Handle("POST /user/logout", protected.ThenFunc(app.userLogout))
 
-	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders)
+	standard := alice.New(app.recoverPanic, app.logRequest, commonHeaders, preventCSRF)
 
 	return standard.Then(mux)
 }

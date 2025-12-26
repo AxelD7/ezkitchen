@@ -44,7 +44,7 @@ function setupAddProductBtn() {
             let url = `/product/get/?category=${category}&subcategory=${subcat}&color=${color}`
 
             try {
-                const response = await fetch(url)
+                const response = await csrfFetch(url)
                 if (!response.ok)
                     throw new Error(`Response Status: ${response.status}`)
 
@@ -88,14 +88,16 @@ function setupAddProductToEstimateBtn() {
             }
 
             try {
-                const response = await fetch(`/estimate/${estimateID}/items/`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        product_id: productID,
-                        quantity: parseInt(quantity),
-                    }),
-                })
+                const response = await csrfFetch(
+                    `/estimate/${estimateID}/items/`,
+                    {
+                        method: "POST",
+                        body: JSON.stringify({
+                            product_id: productID,
+                            quantity: parseInt(quantity),
+                        }),
+                    },
+                )
 
                 if (!response.ok) {
                     const data = await response.json().catch(() => ({}))
@@ -133,13 +135,15 @@ function setupUpdateItemBtn() {
             }
 
             try {
-                const response = await fetch(`/estimate/items/${lineItemID}`, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        quantity: parseInt(newQuantity),
-                    }),
-                })
+                const response = await csrfFetch(
+                    `/estimate/items/${lineItemID}`,
+                    {
+                        method: "PUT",
+                        body: JSON.stringify({
+                            quantity: parseInt(newQuantity),
+                        }),
+                    },
+                )
                 if (!response.ok)
                     throw new Error(`Response status: ${response.status}`)
                 location.reload()
@@ -157,9 +161,12 @@ function setupDeleteBtn() {
         delItemBtn[i].addEventListener("click", async function () {
             const lineItemID = this.closest("tr").dataset.lineItemId
             try {
-                const response = await fetch(`/estimate/items/${lineItemID}`, {
-                    method: "DELETE",
-                })
+                const response = await csrfFetch(
+                    `/estimate/items/${lineItemID}`,
+                    {
+                        method: "DELETE",
+                    },
+                )
                 if (!response.ok)
                     throw new Error(`Response status: ${response.status}`)
                 location.reload()

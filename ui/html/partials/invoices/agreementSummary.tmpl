@@ -52,6 +52,7 @@
             action="/invoice/sign"
             enctype="multipart/form-data"
         >
+            <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />
             <input type="file" id="signature-file" name="signature" hidden />
             <input
                 type="hidden"

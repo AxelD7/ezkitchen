@@ -1,14 +1,23 @@
 {{ define "nav" }}
     <div class="sidebar">
-        <a href="/" class="active">Home</a>
+        <a href="/" class="sidebar-item">Home</a>
+
         {{ if .IsAuthenticated }}
-            <a href="/dashboard" class="active">Dashboard</a>
-            <a href="/" class="active">Estimates</a>
-            <a href="/estimate/create" class="active">New Estimate</a>
-            <a href="/" class="active">Settings</a>
-            <a href="/user/logout" class="active">Log out</a>
+            <a href="/dashboard" class="sidebar-item">Dashboard</a>
+            <a href="/" class="sidebar-item">Estimates</a>
+            <a href="/estimate/create" class="sidebar-item">New Estimate</a>
+            <a href="/" class="sidebar-item">Settings</a>
+
+            <form method="POST" action="/user/logout">
+                <input
+                    type="hidden"
+                    name="csrf_token"
+                    value="{{ .CSRFToken }}"
+                />
+                <button type="submit" class="sidebar-item">Log out</button>
+            </form>
         {{ else }}
-            <a href="/user/login" class="active">Log in</a>
+            <a href="/user/login" class="sidebar-item">Log in</a>
         {{ end }}
     </div>
 {{ end }}

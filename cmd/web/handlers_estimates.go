@@ -75,11 +75,10 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 	app.render(w, r, http.StatusOK, "viewEstimate.tmpl", data)
 }
 
-func (app *application) estimateCreate(w http.ResponseWriter, r *http.Request) {
-
-	app.render(w, r, http.StatusOK, "createEstimate.tmpl", templateData{
-		Form: estimateCreateForm{},
-	})
+func (app *application) estimateCreateView(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	data.Form = estimateCreateForm{}
+	app.render(w, r, http.StatusOK, "createEstimate.tmpl", data)
 }
 
 func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Request) {
@@ -129,7 +128,7 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		customer := models.User{
+		customer = models.User{
 			Name:           form.Name,
 			Email:          form.Email,
 			HashedPassword: sql.NullString{Valid: false},

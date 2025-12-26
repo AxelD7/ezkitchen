@@ -13,6 +13,7 @@ import (
 	"strconv"
 
 	"github.com/go-playground/form/v4"
+	"github.com/justinas/nosurf"
 )
 
 // ---ERROR HANDLING HELPERS---
@@ -113,7 +114,7 @@ func (app *application) isAuthenticated(r *http.Request) bool {
 }
 
 // newTemplateData generates a struct of templateData. This should be used in all renders.
-// This function also instantiates the session flash and IsAuthenticated properties to template data.
+// This function also instantiates the session flash, IsAuthenticated, and CSRFToken properties to template data.
 func (app *application) newTemplateData(r *http.Request) templateData {
 	var flash FlashMessage
 	val := app.sessionManager.Pop(r.Context(), "flash")
@@ -124,5 +125,6 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	return templateData{
 		Flash:           flash,
 		IsAuthenticated: app.isAuthenticated(r),
+		CSRFToken:       nosurf.Token(r),
 	}
 }

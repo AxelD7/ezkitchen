@@ -21,16 +21,26 @@ body {
     padding-top: 100px;
 }
 
-.sidebar a {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 25px;
-    color: white;
+.sidebar-item {
     display: block;
+    width: 100%;
+    padding: 8px 8px 8px 32px;
+    background: none;
+    border: none;
+    font-size: 25px;
+    font-family: inherit;
+    color: white;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
 }
 
-.sidebar a:hover {
+.sidebar-item:hover {
     background-color: #14181e;
+}
+
+.sidebar form {
+    margin: 0;
 }
 
 .flash {
@@ -49,15 +59,15 @@ body {
 }
 
 .flash.success {
-    background-color: #2ecc71; /* green */
+    background-color: #2ecc71;
 }
 
 .flash.error {
-    background-color: #e74c3c; /* red */
+    background-color: #e74c3c;
 }
 
 .flash.info {
-    background-color: #3498db; /* blue */
+    background-color: #3498db;
 }
 
 @keyframes fadeInOut {
