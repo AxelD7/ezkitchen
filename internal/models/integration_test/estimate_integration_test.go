@@ -11,7 +11,7 @@ type testUser struct{ ID int }
 
 func createTestUser(t *testing.T, name, email, role string) testUser {
 	t.Helper()
-	stmt := `INSERT INTO users (name, email, password_hash, role, created_at)
+	stmt := `INSERT INTO users (name, email, hashed_password, role, created_at)
 	         VALUES ($1, $2, 'testhash', $3, NOW())
 	         RETURNING user_id`
 	var id int

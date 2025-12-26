@@ -1,8 +1,17 @@
 package main
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	app.render(w, r, http.StatusOK, "home.tmpl", templateData{})
+	id := app.sessionManager.Get(r.Context(), "authenticatedUserID")
+
+	app.logger.Info(fmt.Sprintf("CURRENT USER ID %v", id))
+
+	data := app.newTemplateData(r)
+
+	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }

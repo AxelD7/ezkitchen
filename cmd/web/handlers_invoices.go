@@ -11,20 +11,22 @@ import (
 
 func (app *application) signInvoiceView(w http.ResponseWriter, r *http.Request) {
 
+	data := app.newTemplateData(r)
+
 	rawToken := r.URL.Query().Get("token")
 	if rawToken == "" {
-		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", data)
 		return
 	}
 
 	it, err := app.invoiceToken.GetByRawToken(rawToken)
 	if err != nil {
-		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", data)
 		return
 	}
 
 	if time.Now().After(it.ExpiresAt) || it.UsedAt.Valid {
-		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", data)
 		return
 	}
 
@@ -47,7 +49,6 @@ func (app *application) signInvoiceView(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	data := app.newTemplateData(r)
 	data.Estimate = estimate
 	data.Customer = customer
 	data.Products = estimateProducts
@@ -63,11 +64,12 @@ func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) 
 	ctx := r.Context()
 
 	rawToken := r.FormValue("token")
+	data := app.newTemplateData(r)
 
 	it, err := app.invoiceToken.GetByRawToken(rawToken)
 	if err != nil {
 		app.clientError(w, r, http.StatusBadRequest)
-		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", templateData{})
+		app.render(w, r, http.StatusGone, "invalidInvoice.tmpl", data)
 		return
 	}
 
@@ -148,7 +150,7 @@ func (app *application) submitSignature(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	app.render(w, r, http.StatusOK, "invoiceSignatureSuccess.tmpl", app.newTemplateData(r))
+	app.render(w, r, http.StatusOK, "invoiceSignatureSuccess.tmpl", data)
 
 }
 

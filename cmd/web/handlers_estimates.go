@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"errors"
 	"ezkitchen/internal/mailer"
@@ -121,19 +122,28 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	customer := models.User{
-		Name:         form.Name,
-		Email:        form.Email,
-		PasswordHash: "",
-		Phone:        form.Phone,
-		Role:         models.RoleCustomer,
-		CreatedAt:    time.Now(),
-	}
-
-	err = app.users.Insert(&customer)
+	customer, err := app.users.GetByEmail(form.Email)
 	if err != nil {
-		app.serverError(w, r, err)
-		return
+		if !errors.Is(err, models.ErrNoRecord) {
+			app.serverError(w, r, err)
+			return
+		}
+
+		customer := models.User{
+			Name:           form.Name,
+			Email:          form.Email,
+			HashedPassword: sql.NullString{Valid: false},
+			Phone:          form.Phone,
+			Role:           models.RoleCustomer,
+			CreatedAt:      time.Now(),
+		}
+
+		err = app.users.Insert(&customer)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
 	}
 
 	estimate := models.Estimate{

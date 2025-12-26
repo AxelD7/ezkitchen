@@ -106,6 +106,14 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 	buf.WriteTo(w)
 }
 
+// isAuthenticated is a function to check if the session from the request has the
+// "authenticatedUserID"
+func (app *application) isAuthenticated(r *http.Request) bool {
+	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+}
+
+// newTemplateData generates a struct of templateData. This should be used in all renders.
+// This function also instantiates the session flash and IsAuthenticated properties to template data.
 func (app *application) newTemplateData(r *http.Request) templateData {
 	var flash FlashMessage
 	val := app.sessionManager.Pop(r.Context(), "flash")
@@ -114,6 +122,7 @@ func (app *application) newTemplateData(r *http.Request) templateData {
 	}
 
 	return templateData{
-		Flash: flash,
+		Flash:           flash,
+		IsAuthenticated: app.isAuthenticated(r),
 	}
 }

@@ -9,6 +9,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 // Role represents the type of user in the system.
@@ -22,13 +24,13 @@ const (
 
 // User represents a customer, surveyor, or admin account in the system.
 type User struct {
-	UserID       int
-	Name         string
-	Email        string
-	PasswordHash string // IMPORTANT: this is currently dummy data and awaiting user auth for full implementation.
-	Phone        string
-	Role         Role
-	CreatedAt    time.Time
+	UserID         int
+	Name           string
+	Email          string
+	HashedPassword sql.NullString
+	Phone          string
+	Role           Role
+	CreatedAt      time.Time
 }
 
 // UserModel wraps a sql.DB connection and provides methods for managing user tables.
@@ -39,12 +41,13 @@ type UserModel struct {
 // Insert creates a new user record in the database and sets u.UserID.
 // Returns an error if the insert fails.
 func (m *UserModel) Insert(u *User) error {
-	stmt := `INSERT INTO users (name, email, password_hash, role, phone, created_at)
+
+	stmt := `INSERT INTO users (name, email, hashed_password, role, phone, created_at)
              VALUES ($1, $2, $3, $4, $5, $6)
              RETURNING user_id`
 
 	err := m.DB.QueryRow(stmt,
-		u.Name, u.Email, u.PasswordHash, u.Role, u.Phone, u.CreatedAt,
+		u.Name, u.Email, u.HashedPassword, u.Role, u.Phone, u.CreatedAt,
 	).Scan(&u.UserID)
 	if err != nil {
 		return err
@@ -55,15 +58,58 @@ func (m *UserModel) Insert(u *User) error {
 // Get retrieves a user by ID. Returns sql.ErrNoRows if no matching record exists.
 func (m *UserModel) Get(id int) (User, error) {
 	var user User
-	user.UserID = id
 
-	stmt := `SELECT name, email, password_hash, role, phone, created_at
+	stmt := `SELECT user_id, name, email, hashed_password, role, phone, created_at
              FROM users WHERE user_id=$1`
 
-	row := m.DB.QueryRow(stmt, user.UserID)
-	err := row.Scan(&user.Name, &user.Email, &user.PasswordHash, &user.Role, &user.Phone, &user.CreatedAt)
+	row := m.DB.QueryRow(stmt, id)
+	err := row.Scan(&user.UserID, &user.Name, &user.Email, &user.HashedPassword, &user.Role, &user.Phone, &user.CreatedAt)
 	if errors.Is(err, sql.ErrNoRows) {
 		return User{}, sql.ErrNoRows
+	} else if err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
+
+// Authenticate fetches a user record via email and compares the user object from GetByEmail() to the password string input
+// If the password is correct, the userID is returned, otherwise an invalid credntials error is returned with 0 as the userID.
+func (m *UserModel) Authenticate(email string, password string) (int, error) {
+
+	user, err := m.GetByEmail(email)
+	if err != nil {
+		if errors.Is(err, ErrNoRecord) {
+			return 0, ErrInvalidCredentials
+		}
+		return 0, err
+
+	}
+
+	if !user.HashedPassword.Valid {
+		return 0, ErrInvalidCredentials
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.HashedPassword.String), []byte(password))
+	if err != nil {
+
+		return 0, ErrInvalidCredentials
+	}
+
+	return user.UserID, nil
+}
+
+// GetByEmail fetches a user record via the email passed in.
+// Returns a user object if there exists a record with the email, otherwise ErrNoRecord.
+func (m *UserModel) GetByEmail(email string) (User, error) {
+	var user User
+
+	stmt := `SELECT user_id, name, email, hashed_password, role, phone, created_at
+             FROM users WHERE email=$1`
+
+	row := m.DB.QueryRow(stmt, email)
+	err := row.Scan(&user.UserID, &user.Name, &user.Email, &user.HashedPassword, &user.Role, &user.Phone, &user.CreatedAt)
+	if errors.Is(err, sql.ErrNoRows) {
+		return User{}, ErrNoRecord
 	} else if err != nil {
 		return User{}, err
 	}

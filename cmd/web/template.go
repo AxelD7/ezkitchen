@@ -14,13 +14,14 @@ import (
 // in the future when multiple tables are required to load an estimate
 // (ie. Surveyor(user), Estimate, and Customer(user)) be sure to update this.
 type templateData struct {
-	Estimate       models.Estimate
-	Customer       models.User
-	Products       []models.EstimateProduct
-	EstimateTotals models.EstimateTotals
-	Form           any
-	Token          string
-	Flash          FlashMessage
+	Estimate        models.Estimate
+	Customer        models.User
+	Products        []models.EstimateProduct
+	EstimateTotals  models.EstimateTotals
+	Form            any
+	Token           string
+	Flash           FlashMessage
+	IsAuthenticated bool
 }
 
 type FlashMessage struct {

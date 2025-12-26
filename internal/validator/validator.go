@@ -6,14 +6,19 @@ import (
 	"unicode/utf8"
 )
 
-// Validator stores field-specific validation errors.
+// Validator stores field-specific or non field specific validation errors.
 type Validator struct {
-	FieldErrors map[string]string
+	NonFieldErrors []string
+	FieldErrors    map[string]string
 }
 
 // Valid returns true if there are no validation errors recorded.
 func (v *Validator) Valid() bool {
-	return len(v.FieldErrors) == 0
+	return len(v.FieldErrors) == 0 && len(v.NonFieldErrors) == 0
+}
+
+func (v *Validator) AddNonFieldError(message string) {
+	v.NonFieldErrors = append(v.NonFieldErrors, message)
 }
 
 // AddFieldError adds a new error message for the given field key

@@ -9,6 +9,7 @@ import (
 	"crypto/tls"
 	"database/sql"
 	"encoding/gob"
+	"errors"
 	"ezkitchen/internal/mailer"
 	"ezkitchen/internal/models"
 	"ezkitchen/internal/storage"
@@ -29,6 +30,7 @@ import (
 	"github.com/go-playground/form/v4"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type application struct {
@@ -136,6 +138,16 @@ func main() {
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
 	}
+	adminPass := os.Getenv("ADMIN_PASSWORD")
+	if adminPass == "" {
+		logger.Error("ADMIN_PASSWORD must be set")
+		os.Exit(1)
+	}
+	err = app.ensureAdminExists(adminPass)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
 	logger.Info("Starting server", "addr", *addr)
 
@@ -158,4 +170,32 @@ func openDB(psqlStr string) (*sql.DB, error) {
 	}
 
 	return db, nil
+}
+
+func (app *application) ensureAdminExists(adminPass string) error {
+	_, err := app.users.GetByEmail("admin@admin.com")
+	if err != nil {
+		if !errors.Is(err, models.ErrNoRecord) {
+			return err
+		}
+		hashedPass, err := bcrypt.GenerateFromPassword([]byte(adminPass), 12)
+		if err != nil {
+			return err
+		}
+
+		admin := &models.User{
+			Name:           "John Admin",
+			Email:          "admin@admin.com",
+			HashedPassword: sql.NullString{String: string(hashedPass), Valid: true},
+			Phone:          "3138889999",
+			Role:           models.RoleAdmin,
+			CreatedAt:      time.Now(),
+		}
+
+		err = app.users.Insert(admin)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

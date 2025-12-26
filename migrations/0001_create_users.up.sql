@@ -1,14 +1,14 @@
 CREATE TABLE IF NOT EXISTS users (
     user_id SERIAL PRIMARY KEY,
-    name VARCHAR(100),
-    email VARCHAR(320) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL,
+    name VARCHAR(255),
+    email VARCHAR(255) NOT NULL UNIQUE,
+    hashed_password VARCHAR(60) NULL,
     role VARCHAR(20) NOT NULL,
     phone VARCHAR(15),
     created_at TIMESTAMP
 );
 
-INSERT INTO users (name, email, password_hash, phone, role)
+INSERT INTO users (name, email, hashed_password, phone, role)
 VALUES (
     'Admin User',
     'admin@example.com',
