@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 
@@ -65,6 +66,26 @@ func (app *application) requireAuthentication(next http.Handler) http.Handler {
 
 	})
 
+}
+
+func (app *application) authenticate(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+		if id == 0 {
+			next.ServeHTTP(w, r)
+			return
+		}
+
+		user, err := app.users.Get(id)
+		if err != nil {
+			app.serverError(w, r, err)
+			return
+		}
+
+		ctx := context.WithValue(r.Context(), contextUserKey, user)
+		r = r.WithContext(ctx)
+		next.ServeHTTP(w, r)
+	})
 }
 
 func preventCSRF(next http.Handler) http.Handler {

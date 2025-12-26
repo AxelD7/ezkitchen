@@ -121,6 +121,8 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	currUser := app.currentUser(r)
+
 	customer, err := app.users.GetByEmail(form.Email)
 	if err != nil {
 		if !errors.Is(err, models.ErrNoRecord) {
@@ -147,7 +149,7 @@ func (app *application) estimateCreatePost(w http.ResponseWriter, r *http.Reques
 
 	estimate := models.Estimate{
 		CustomerID:        customer.UserID,
-		CreatedBy:         1,
+		CreatedBy:         currUser.UserID,
 		Status:            models.StatusDraft,
 		CreatedAt:         time.Now(),
 		KitchenLengthInch: form.Length,

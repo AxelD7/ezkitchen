@@ -7,9 +7,9 @@ import (
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	id := app.sessionManager.Get(r.Context(), "authenticatedUserID")
+	user := app.currentUser(r)
 
-	app.logger.Info(fmt.Sprintf("CURRENT USER ID %v", id))
+	fmt.Printf("USER OBJECT: %+v\n", user)
 
 	data := app.newTemplateData(r)
 

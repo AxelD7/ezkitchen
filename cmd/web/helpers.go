@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"ezkitchen/internal/models"
 	"fmt"
 	"log"
 	"net/http"
@@ -111,6 +112,18 @@ func (app *application) render(w http.ResponseWriter, r *http.Request, status in
 // "authenticatedUserID"
 func (app *application) isAuthenticated(r *http.Request) bool {
 	return app.sessionManager.Exists(r.Context(), "authenticatedUserID")
+}
+
+// currentUser is a helper function utilizing request context to fetch the
+// logged in users' record. This utilizes the "user" context key
+func (app *application) currentUser(r *http.Request) models.User {
+	currUser, ok := r.Context().Value(contextUserKey).(models.User)
+	if !ok {
+		return models.User{}
+	}
+
+	return currUser
+
 }
 
 // newTemplateData generates a struct of templateData. This should be used in all renders.
