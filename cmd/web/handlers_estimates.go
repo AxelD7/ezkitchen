@@ -36,6 +36,29 @@ type estimateCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
+func (app *application) estimateListView(w http.ResponseWriter, r *http.Request) {
+
+	currUser := app.currentUser(r)
+
+	if currUser.UserID < 1 {
+		app.clientError(w, r, http.StatusUnauthorized)
+		return
+	}
+
+	userEstimates, err := app.estimates.GetSurveyorsEstimates(currUser.UserID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	data := app.newTemplateData(r)
+
+	data.EstimateList = userEstimates
+
+	app.render(w, r, http.StatusOK, "listEstimate.tmpl", data)
+
+}
+
 func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 
 	var estimate models.Estimate

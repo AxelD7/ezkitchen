@@ -1,0 +1,144 @@
+.main-section {
+    width: 100%;
+    padding: 32px;
+    box-sizing: border-box;
+}
+
+.invoice-wrapper {
+    width: 100%;
+    max-width: none;
+    margin: 0;
+}
+
+.invoice-box {
+    width: 100%;
+    padding: 24px 32px;
+    box-sizing: border-box;
+    border: 2px solid #000;
+    border-radius: 6px;
+    min-height: calc(100vh - 140px);
+}
+
+.invoice-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e6e6e6;
+    margin-bottom: 24px;
+}
+
+.estimate-list-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.estimate-list-table thead th {
+    text-align: left;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #555;
+    border-bottom: 1px solid #e6e6e6;
+    white-space: nowrap;
+}
+
+.estimate-list-table th,
+.estimate-list-table td {
+    padding: 14px 12px;
+}
+
+.estimate-list-table tbody tr {
+    border-bottom: 1px solid #ededed;
+}
+
+.estimate-list-table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.estimate-list-table td:last-child {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.estimate-list-table td:nth-child(3) {
+    white-space: normal;
+}
+
+.estimate-list-table td:nth-child(4) {
+    white-space: nowrap;
+}
+
+.estimate-list-table td:nth-child(5) {
+    font-weight: 600;
+}
+
+.estimate-status {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.status-draft {
+    background-color: #f3f3f3;
+    color: #555;
+}
+
+.status-awaiting {
+    background-color: #fff4cc;
+    color: #856404;
+}
+
+.status-in-progress {
+    background-color: #e8f1ff;
+    color: #084298;
+}
+
+.status-completed {
+    background-color: #d6eadf;
+    color: #0f5132;
+}
+
+.view-btn {
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    text-align: center;
+    border: 0;
+    padding: 7px 16px;
+    color: #333c4d;
+    background: #66cc8a;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow:
+        rgba(0, 0, 0, 0.05) 0px 1px 0px 0px,
+        rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+}
+
+.view-btn:hover {
+    background: #57b87a;
+    transform: translateY(-1px);
+    box-shadow:
+        rgba(0, 0, 0, 0.1) 0px 2px 4px,
+        rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+}
+.empty-state {
+    text-align: center;
+    padding: 48px 16px;
+    color: #777;
+}
+
+@media (max-width: 900px) {
+    .main-section {
+        padding: 16px;
+    }
+
+    .invoice-box {
+        padding: 20px;
+        min-height: calc(100vh - 120px);
+    }
+
+    .estimate-list-table th:nth-child(3),
+    .estimate-list-table td:nth-child(3) {
+        display: none;
+    }
+}

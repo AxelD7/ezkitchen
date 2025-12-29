@@ -79,6 +79,16 @@ type EstimateTotals struct {
 	EstimateTotal int
 }
 
+type EstimateListItem struct {
+	EstimateID   int
+	CustomerName string
+	Street       string
+	City         string
+	State        string
+	Status       EstimateStatus
+	Total        int
+}
+
 // Executor for any transaction based model methods (rollbacks on failure)
 type executor interface {
 	Exec(query string, args ...any) (sql.Result, error)
@@ -141,14 +151,20 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 
 // GetSurveyorsEstimates retrieves up to 10 estimates created by a specific surveyor (CreatedBy field).
 // Returns ErrNoRecord or an empty slice if no estimates are found.
-func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error) {
-	var estimates []Estimate
-	stmt := `SELECT estimate_id, customer_id, created_by, status, created_at,
-       	kitchen_length_inch, kitchen_width_inch, kitchen_height_inch,
-		door_width_inch, door_height_inch, street, city, state, zip 
-	   	FROM estimates WHERE created_by=$1 ORDER BY created_at LIMIT $2`
+func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]EstimateListItem, error) {
+	stmt := `SELECT 
+	e.estimate_id,
+	c.name,
+	e.status, 
+	e.street,
+	e.city,
+	e.state
+	FROM estimates e
+	JOIN users c on c.user_id = e.customer_id 
+	WHERE estimate_id = $1 
+	ORDER BY e.created_at`
 
-	rows, err := m.DB.Query(stmt, surveyorID, 10)
+	rows, err := m.DB.Query(stmt, surveyorID)
 	if err == sql.ErrNoRows {
 		return nil, fmt.Errorf("no estimates were found - no rows returned")
 	} else if err != nil {
@@ -156,20 +172,25 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]Estimate, error
 	}
 
 	defer rows.Close()
+	var estimates []EstimateListItem
+
 	for rows.Next() {
-		var estimate Estimate
-		var statusInt int
-		err = rows.Scan(&estimate.EstimateID, &estimate.CustomerID, &estimate.CreatedBy, &statusInt, &estimate.CreatedAt, &estimate.KitchenLengthInch, &estimate.KitchenWidthInch, &estimate.KitchenHeightInch, &estimate.DoorWidthInch, &estimate.DoorHeightInch, &estimate.Street, &estimate.City, &estimate.State, &estimate.Zip)
+		var e EstimateListItem
 
-		estimate.Status = EstimateStatus(statusInt)
-
+		err := rows.Scan(
+			&e.EstimateID,
+			&e.CustomerName,
+			&e.Status,
+			&e.Street,
+			&e.City,
+			&e.State,
+		)
 		if err != nil {
 			return nil, err
 		}
 
-		estimates = append(estimates, estimate)
+		estimates = append(estimates, e)
 	}
-
 	return estimates, nil
 }
 

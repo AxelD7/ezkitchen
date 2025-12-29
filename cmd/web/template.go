@@ -15,6 +15,7 @@ import (
 // (ie. Surveyor(user), Estimate, and Customer(user)) be sure to update this.
 type templateData struct {
 	Estimate        models.Estimate
+	EstimateList    []models.EstimateListItem
 	Customer        models.User
 	Products        []models.EstimateProduct
 	EstimateTotals  models.EstimateTotals

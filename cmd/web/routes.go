@@ -28,6 +28,8 @@ func (app *application) routes() http.Handler {
 	mux.Handle("PUT /estimate/items/{id}", protected.ThenFunc(app.estimateUpdateItem))
 	mux.Handle("DELETE /estimate/items/{id}", protected.ThenFunc(app.estimateDeleteItem))
 
+	mux.Handle("GET /estimate/list", protected.ThenFunc(app.estimateListView))
+
 	mux.Handle("DELETE /estimate/delete/{id}", protected.ThenFunc(app.estimateDelete))
 
 	// --------------- Products ---------------
