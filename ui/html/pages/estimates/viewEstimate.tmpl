@@ -7,6 +7,10 @@
 
 {{ define "script-tags" }}
 {{ end }}
+{{ define "title" }}
+    EzKitchen - Viewing Estimate
+    #{{ .Estimate.EstimateID }}
+{{ end }}
 
 {{ define "content" }}
     {{ template "statusBar" . }}
@@ -52,7 +56,18 @@
         </div>
 
         <div class="items-section">
-            <h1>Estimate Line Items</h1>
+            <div class="items-header">
+                <h1>Estimate Line Items</h1>
+
+                {{ if eq .Estimate.Status.String "Draft" }}
+                    <a
+                        href="/estimate/edit/{{ .Estimate.EstimateID }}"
+                        class="edit-estimate-btn"
+                    >
+                        Edit Estimate
+                    </a>
+                {{ end }}
+            </div>
 
             {{ $found := false }}
             {{ range .Products }}

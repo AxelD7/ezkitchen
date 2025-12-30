@@ -6,6 +6,8 @@
     <link rel="stylesheet" href="/static/css/main.css" />
 {{ end }}
 
+{{ define "title" }}EzKitchen - Create an Estimate{{ end }}
+
 {{ define "content" }}
     <form action="/estimate/create" method="POST" class="estimate-form">
         <input type="hidden" name="csrf_token" value="{{ .CSRFToken }}" />

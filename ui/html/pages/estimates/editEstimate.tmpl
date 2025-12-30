@@ -10,6 +10,11 @@
     <script src="/static/js/main.js"></script>
 {{ end }}
 
+{{ define "title" }}
+    EzKitchen - Editing Estimate
+    #{{ .Estimate.EstimateID }}
+{{ end }}
+
 {{ define "content" }}
 
     {{ template "statusBar" . }}

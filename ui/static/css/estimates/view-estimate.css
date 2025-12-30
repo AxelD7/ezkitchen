@@ -44,6 +44,44 @@ caption {
     height: fit-content;
     flex-direction: column;
 }
+.items-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.items-header h1 {
+    margin: 0;
+}
+
+.edit-estimate-btn {
+    display: inline-block;
+    outline: 0;
+    cursor: pointer;
+    text-align: center;
+    border: 0;
+    padding: 7px 16px;
+    min-width: 36px;
+    color: #333c4d;
+    background: #e0b200;
+    border-radius: 4px;
+    font-weight: 500;
+    font-size: 14px;
+    box-shadow:
+        rgba(0, 0, 0, 0.05) 0px 1px 0px 0px,
+        rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+}
+
+.edit-estimate-btn:hover {
+    background-color: #e0b200;
+    border-color: #e0b200;
+    color: #000;
+    transform: translateY(-1px);
+    box-shadow:
+        rgba(0, 0, 0, 0.1) 0px 2px 4px,
+        rgba(0, 0, 0, 0.2) 0px -1px 0px 0px inset;
+}
 
 .summary-section {
     width: 20%;
