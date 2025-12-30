@@ -55,6 +55,22 @@ func (m *EstimateItemModel) GetByLineItemID(id int) (EstimateItem, error) {
 	return estimateItem, nil
 }
 
+func (m *EstimateItemModel) GetEstimateIDByLineItemID(lineItemID int) (int, error) {
+	var estimateID int
+	stmt := `SELECT estimate_id FROM estimate_items WHERE line_item_id=$1`
+
+	err := m.DB.QueryRow(stmt, lineItemID).Scan(&estimateID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return 0, ErrNoRecord
+		}
+		return 0, err
+	}
+
+	return estimateID, nil
+
+}
+
 // GetByEstimateID returns all EstimateItems that belong to the specified EstimateID.
 // Each returned record includes associated Product information.
 // Returns a slice of EstimateProduct or an error.

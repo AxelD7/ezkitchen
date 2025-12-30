@@ -37,7 +37,6 @@ type estimateCreateForm struct {
 }
 
 func (app *application) estimateListView(w http.ResponseWriter, r *http.Request) {
-
 	currUser := app.currentUser(r)
 
 	if currUser.UserID < 1 {
@@ -45,18 +44,32 @@ func (app *application) estimateListView(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	userEstimates, err := app.estimates.GetSurveyorsEstimates(currUser.UserID)
+	var (
+		estimates []models.EstimateListItem
+		err       error
+	)
+
+	switch currUser.Role {
+	case models.RoleAdmin:
+		estimates, err = app.estimates.GetAll()
+
+	case models.RoleSurveyor:
+		estimates, err = app.estimates.GetSurveyorsEstimates(currUser.UserID)
+
+	default:
+		app.clientError(w, r, http.StatusForbidden)
+		return
+	}
+
 	if err != nil {
 		app.serverError(w, r, err)
 		return
 	}
 
 	data := app.newTemplateData(r)
-
-	data.EstimateList = userEstimates
+	data.EstimateList = estimates
 
 	app.render(w, r, http.StatusOK, "listEstimate.tmpl", data)
-
 }
 
 func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
@@ -71,8 +84,20 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 
 	estimate, err = app.estimates.Get(id)
 	if err != nil {
-		app.serverError(w, r, err)
+		if errors.Is(err, models.ErrNoRecord) {
+			http.NotFound(w, r)
+		} else {
+			app.serverError(w, r, err)
+		}
 	}
+
+	currUser := app.currentUser(r)
+
+	if currUser.UserID != estimate.CreatedBy && currUser.Role != models.RoleAdmin {
+		app.clientError(w, r, http.StatusNotFound)
+		return
+	}
+
 	estimateProducts, err := app.estimateItems.GetByEstimateID(estimate.EstimateID)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -92,8 +117,6 @@ func (app *application) estimateView(w http.ResponseWriter, r *http.Request) {
 	data.Customer = customer
 	data.Products = estimateProducts
 	data.EstimateTotals = estimateTotals
-
-	fmt.Printf("ESTIMATE OBJECT: %+v\n", estimate)
 
 	app.render(w, r, http.StatusOK, "viewEstimate.tmpl", data)
 }
@@ -219,6 +242,13 @@ func (app *application) estimateEditView(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	currUser := app.currentUser(r)
+
+	if currUser.UserID != estimate.CreatedBy && currUser.Role != models.RoleAdmin {
+		app.clientError(w, r, http.StatusNotFound)
+		return
+	}
+
 	if estimate.Status != models.StatusDraft {
 		app.clientError(w, r, http.StatusConflict)
 		return
@@ -265,6 +295,13 @@ func (app *application) progressEstimate(w http.ResponseWriter, r *http.Request)
 		} else {
 			app.serverError(w, r, err)
 		}
+		return
+	}
+
+	currUser := app.currentUser(r)
+
+	if currUser.UserID != estimate.CreatedBy && currUser.Role != models.RoleAdmin {
+		app.clientError(w, r, http.StatusNotFound)
 		return
 	}
 
@@ -418,6 +455,13 @@ func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) 
 
 	}
 
+	currUser := app.currentUser(r)
+
+	if currUser.UserID != estimate.CreatedBy && currUser.Role != models.RoleAdmin {
+		app.clientError(w, r, http.StatusNotFound)
+		return
+	}
+
 	product, err := app.products.Get(item.ProductID)
 	if err != nil {
 		app.serverError(w, r, err)
@@ -485,6 +529,25 @@ func (app *application) estimateUpdateItem(w http.ResponseWriter, r *http.Reques
 	estimateItem := models.EstimateItem{
 		LineItemID: lineItemID,
 		Quantity:   req.Quantity,
+	}
+
+	estimateID, err := app.estimateItems.GetEstimateIDByLineItemID(lineItemID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	estimate, err := app.estimates.Get(estimateID)
+	if err != nil {
+		app.serverError(w, r, err)
+		return
+	}
+
+	currUser := app.currentUser(r)
+
+	if currUser.UserID != estimate.CreatedBy && currUser.Role != models.RoleAdmin {
+		app.clientError(w, r, http.StatusNotFound)
+		return
 	}
 
 	req.CheckField(validator.GreaterThanN(estimateItem.Quantity, 0), "quantity", "The quantity must be at least 1")

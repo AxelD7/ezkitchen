@@ -17,9 +17,9 @@ import (
 type Role string
 
 const (
-	RoleAdmin    Role = "admin"
-	RoleSurveyor Role = "surveyor"
-	RoleCustomer Role = "customer"
+	RoleAdmin    Role = "ADMIN"
+	RoleSurveyor Role = "SURVEYOR"
+	RoleCustomer Role = "CUSTOMER"
 )
 
 // User represents a customer, surveyor, or admin account in the system.

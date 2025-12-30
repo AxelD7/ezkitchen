@@ -1,17 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"net/http"
 )
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
-	user := app.currentUser(r)
+	isAuth := app.isAuthenticated(r)
+	if isAuth {
+		http.Redirect(w, r, "/estimate/list", http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+	}
 
-	fmt.Printf("USER OBJECT: %+v\n", user)
-
-	data := app.newTemplateData(r)
-
-	app.render(w, r, http.StatusOK, "home.tmpl", data)
 }

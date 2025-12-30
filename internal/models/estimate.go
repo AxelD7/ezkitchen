@@ -148,6 +148,48 @@ func (m *EstimateModel) Get(id int) (Estimate, error) {
 
 	return estimate, nil
 }
+func (m *EstimateModel) GetAll() ([]EstimateListItem, error) {
+
+	stmt := `SELECT 
+	e.estimate_id,
+	c.name,
+	e.status, 
+	e.street,
+	e.city,
+	e.state
+	FROM estimates e
+	JOIN users c on c.user_id = e.customer_id 
+	ORDER BY e.created_at`
+
+	rows, err := m.DB.Query(stmt)
+	if err == sql.ErrNoRows {
+		return nil, fmt.Errorf("no estimates were found - no rows returned")
+	} else if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+	var estimates []EstimateListItem
+
+	for rows.Next() {
+		var e EstimateListItem
+
+		err := rows.Scan(
+			&e.EstimateID,
+			&e.CustomerName,
+			&e.Status,
+			&e.Street,
+			&e.City,
+			&e.State,
+		)
+		if err != nil {
+			return nil, err
+		}
+
+		estimates = append(estimates, e)
+	}
+	return estimates, nil
+}
 
 // GetSurveyorsEstimates retrieves up to 10 estimates created by a specific surveyor (CreatedBy field).
 // Returns ErrNoRecord or an empty slice if no estimates are found.
@@ -161,8 +203,8 @@ func (m *EstimateModel) GetSurveyorsEstimates(surveyorID int) ([]EstimateListIte
 	e.state
 	FROM estimates e
 	JOIN users c on c.user_id = e.customer_id 
-	WHERE estimate_id = $1 
-	ORDER BY e.created_at`
+	WHERE created_by = $1 
+	ORDER BY e.created_at DESC`
 
 	rows, err := m.DB.Query(stmt, surveyorID)
 	if err == sql.ErrNoRows {

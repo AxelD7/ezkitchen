@@ -143,7 +143,13 @@ func main() {
 		logger.Error("ADMIN_PASSWORD must be set")
 		os.Exit(1)
 	}
-	err = app.ensureAdminExists(adminPass)
+	surveyorPass := os.Getenv("SURVEYOR_PASSWORD")
+	if surveyorPass == "" {
+		logger.Error("SURVEYOR_PASSWORD must be set")
+		os.Exit(1)
+	}
+
+	err = app.ensureSystemUsers(adminPass, surveyorPass)
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
@@ -172,12 +178,13 @@ func openDB(psqlStr string) (*sql.DB, error) {
 	return db, nil
 }
 
-func (app *application) ensureAdminExists(adminPass string) error {
-	_, err := app.users.GetByEmail("admin@admin.com")
+func (app *application) ensureSystemUsers(adminPass, surveyorPass string) error {
+	_, err := app.users.GetByEmail("johnadmin@ezkitchen.com")
 	if err != nil {
 		if !errors.Is(err, models.ErrNoRecord) {
 			return err
 		}
+
 		hashedPass, err := bcrypt.GenerateFromPassword([]byte(adminPass), 12)
 		if err != nil {
 			return err
@@ -185,17 +192,42 @@ func (app *application) ensureAdminExists(adminPass string) error {
 
 		admin := &models.User{
 			Name:           "John Admin",
-			Email:          "admin@admin.com",
+			Email:          "johnadmin@ezkitchen.com",
 			HashedPassword: sql.NullString{String: string(hashedPass), Valid: true},
 			Phone:          "3138889999",
 			Role:           models.RoleAdmin,
 			CreatedAt:      time.Now(),
 		}
 
-		err = app.users.Insert(admin)
-		if err != nil {
+		if err := app.users.Insert(admin); err != nil {
 			return err
 		}
 	}
+
+	_, err = app.users.GetByEmail("jakesurveyor@ezkitchen.com")
+	if err != nil {
+		if !errors.Is(err, models.ErrNoRecord) {
+			return err
+		}
+
+		hashedPass, err := bcrypt.GenerateFromPassword([]byte(surveyorPass), 12)
+		if err != nil {
+			return err
+		}
+
+		surveyor := &models.User{
+			Name:           "jake Surveyor",
+			Email:          "jakesurveyor@ezkitchen.com",
+			HashedPassword: sql.NullString{String: string(hashedPass), Valid: true},
+			Phone:          "3137778888",
+			Role:           models.RoleSurveyor,
+			CreatedAt:      time.Now(),
+		}
+
+		if err := app.users.Insert(surveyor); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
