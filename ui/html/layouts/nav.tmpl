@@ -1,7 +1,5 @@
 {{ define "nav" }}
     <div class="sidebar">
-        <a href="/" class="sidebar-item">Home</a>
-
         {{ if .IsAuthenticated }}
             <a href="/estimate/list" class="sidebar-item">Estimates</a>
             <a href="/estimate/create" class="sidebar-item">New Estimate</a>

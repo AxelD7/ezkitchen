@@ -341,7 +341,7 @@ func (m *EstimateModel) CalculateEstimateTotals(estimateProducts []EstimateProdu
 	}
 
 	totals.LaborTotal += 30000
-	totals.SalesTax = totals.Subtotal / 6
+	totals.SalesTax = (totals.Subtotal*6 + 50) / 100
 	totals.EstimateTotal = totals.Subtotal + totals.SalesTax + totals.LaborTotal
 
 	return totals

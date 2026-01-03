@@ -487,6 +487,12 @@ func (app *application) estimateAddItem(w http.ResponseWriter, r *http.Request) 
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+		Type:    "success",
+		Message: "Item added to estimate.",
+	})
+
 	w.WriteHeader(http.StatusOK)
 
 }
@@ -563,6 +569,11 @@ func (app *application) estimateUpdateItem(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+		Type:    "success",
+		Message: "Line item updated.",
+	})
+
 	w.WriteHeader(http.StatusOK)
 }
 
@@ -578,6 +589,11 @@ func (app *application) estimateDeleteItem(w http.ResponseWriter, r *http.Reques
 		app.serverError(w, r, err)
 		return
 	}
+
+	app.sessionManager.Put(r.Context(), "flash", FlashMessage{
+		Type:    "success",
+		Message: "Line item deleted.",
+	})
 
 	w.WriteHeader(http.StatusOK)
 
