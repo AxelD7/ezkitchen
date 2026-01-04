@@ -16,12 +16,17 @@ EzKitchen allows authenticated users (Administrators or Surveyors) to create, vi
 A typical workflow looks like this:
 
 1. A surveyor logs in and creates a new estimate for a customer.
-2. The estimate is populated with line items such as cabinetry, appliances, countertops, or labor.
+2. The estimate is populated with line items such as cabinetry, appliances, or countertops.
 3. Each estimate progresses through a series of statuses (for example: draft, awaiting agreement, in progress, completed).
 4. Users can return to existing estimates to update details or advance the job to the next stage.
 5. The system enforces validation rules and access controls to prevent invalid or unauthorized changes.
 
 The goal is to provide a clear, structured way to track work from the initial on-site survey through completion.
+
+## Demonstration Video
+
+If you’re interested in seeing a demonstration of this project, I’ve included a short video walkthrough here:
+https://youtu.be/aBaygph1tBI
 
 ## Features
 
